@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum ThemePreference {
+  SYSTEM
+  LIGHT
+  DARK
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  EMPLOYEE
+}
+
+// Ramos de Atividade
+model ActivityBranch {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // Relacionamentos
+  companies Company[]
+
+  @@map("activity_branches")
+}
+
+// Empresas
+model Company {
+  id                  Int      @id @default(autoincrement())
+  name                String
+  email               String
+  phone               String
+  address             String
+  logoUrl             String?  @map("logo_url")
+  activityBranchId    Int      @map("activity_branch_id")
+  customShareTemplate String?  @map("custom_share_template")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  // Relacionamentos
+  activityBranch ActivityBranch @relation(fields: [activityBranchId], references: [id])
+  users          User[]
+
+  @@map("companies")
+}
+
+// Usuários do sistema
+model User {
+  id                   Int             @id @default(autoincrement())
+  companyId            Int             @map("company_id")
+  name                 String
+  email                String          @unique
+  passwordHash         String          @map("password_hash")
+  phone                String?
+  biometricAuthEnabled Boolean         @default(false) @map("biometric_auth_enabled")
+  emailConfirmed       Boolean         @default(false) @map("email_confirmed")
+  firstAccessCompleted Boolean         @default(false) @map("first_access_completed")
+  role                 UserRole        @default(EMPLOYEE)
+  themePreference      ThemePreference @default(SYSTEM) @map("theme_preference")
+  createdAt            DateTime        @default(now()) @map("created_at")
+  updatedAt            DateTime        @updatedAt @map("updated_at")
+
+  // Relacionamentos
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@map("users")
+}
