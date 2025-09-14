@@ -27,57 +27,188 @@ enum UserRole {
   EMPLOYEE
 }
 
-// Ramos de Atividade
 model ActivityBranch {
-  id          Int      @id @default(autoincrement())
+  id          String                   @id @default(uuid())
   name        String
   description String?
-  createdAt   DateTime @default(now()) @map("created_at")
-
-  // Relacionamentos
-  companies Company[]
-
-  @@map("activity_branches")
+  companies   Company[]
+  services    DefaultActivityService[]
+  Service     Service[]
 }
 
-// Empresas
 model Company {
-  id                  Int      @id @default(autoincrement())
+  id                  String   @id @default(uuid())
   name                String
-  email               String
+  email               String   @unique
   phone               String
   address             String
-  logoUrl             String?  @map("logo_url")
-  activityBranchId    Int      @map("activity_branch_id")
-  customShareTemplate String?  @map("custom_share_template")
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
+  logoUrl             String? // opcional
+  activityBranchId    String
+  customShareTemplate String? // opcional
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  // Relacionamentos
   activityBranch ActivityBranch @relation(fields: [activityBranchId], references: [id])
   users          User[]
-
-  @@map("companies")
+  employees      Employee[]
+  services       Service[]
+  clients        Client[]
+  appointments   Appointment[]
+  attendances    Attendance[]
 }
 
-// Usuários do sistema
 model User {
-  id                   Int             @id @default(autoincrement())
-  companyId            Int             @map("company_id")
+  id                   String          @id @default(uuid())
+  companyId            String
   name                 String
   email                String          @unique
-  passwordHash         String          @map("password_hash")
+  passwordHash         String
   phone                String?
-  biometricAuthEnabled Boolean         @default(false) @map("biometric_auth_enabled")
-  emailConfirmed       Boolean         @default(false) @map("email_confirmed")
-  firstAccessCompleted Boolean         @default(false) @map("first_access_completed")
-  role                 UserRole        @default(EMPLOYEE)
-  themePreference      ThemePreference @default(SYSTEM) @map("theme_preference")
-  createdAt            DateTime        @default(now()) @map("created_at")
-  updatedAt            DateTime        @updatedAt @map("updated_at")
+  biometricAuthEnabled Boolean         @default(false)
+  emailConfirmed       Boolean         @default(false)
+  firstAccessCompleted Boolean         @default(false)
+  role                 UserRole
+  themePreference      ThemePreference
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
 
-  // Relacionamentos
-  company Company @relation(fields: [companyId], references: [id])
+  company                Company                 @relation(fields: [companyId], references: [id])
+  passwordRecoveryTokens PasswordRecoveryToken[]
+}
 
-  @@map("users")
+model Service {
+  id                   String   @id @default(uuid())
+  companyId            String
+  name                 String
+  description          String
+  isFavorite           Boolean  @default(false)
+  isFromActivityBranch Boolean  @default(false)
+  activityBranchId     String? // rastrear origem
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  company             Company                     @relation(fields: [companyId], references: [id])
+  activityBranch      ActivityBranch?             @relation(fields: [activityBranchId], references: [id])
+  employeePreferences EmployeeServicePreference[]
+  appointments        Appointment[]
+  attendanceServices  AttendanceService[]
+  attendanceEmployees AttendanceEmployee[]
+}
+
+model Employee {
+  id        String   @id @default(uuid())
+  companyId String
+  name      String
+  photoUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company             Company                     @relation(fields: [companyId], references: [id])
+  servicePreferences  EmployeeServicePreference[]
+  appointments        Appointment[]
+  attendanceEmployees AttendanceEmployee[]
+}
+
+model EmployeeServicePreference {
+  id         String   @id @default(uuid())
+  employeeId String
+  serviceId  String
+  createdAt  DateTime @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [id])
+  service  Service  @relation(fields: [serviceId], references: [id])
+}
+
+model Client {
+  id        String   @id @default(uuid())
+  companyId String
+  name      String
+  phone     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company      Company       @relation(fields: [companyId], references: [id])
+  appointments Appointment[]
+  attendances  Attendance[]
+}
+
+model Appointment {
+  id              String   @id @default(uuid())
+  companyId       String
+  clientId        String
+  serviceId       String
+  employeeId      String? // opcional
+  appointmentDate DateTime
+  appointmentTime DateTime
+  status          String // scheduled/completed/cancelled
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  company    Company     @relation(fields: [companyId], references: [id])
+  client     Client      @relation(fields: [clientId], references: [id])
+  service    Service     @relation(fields: [serviceId], references: [id])
+  employee   Employee?   @relation(fields: [employeeId], references: [id])
+  attendance Attendance?
+}
+
+model Attendance {
+  id             String    @id @default(uuid())
+  appointmentId  String    @unique
+  companyId      String
+  clientId       String
+  attendanceDate DateTime
+  attendanceTime DateTime
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  appointment Appointment          @relation(fields: [appointmentId], references: [id])
+  company     Company              @relation(fields: [companyId], references: [id])
+  client      Client               @relation(fields: [clientId], references: [id])
+  services    AttendanceService[]
+  employees   AttendanceEmployee[]
+}
+
+model AttendanceService {
+  id           String   @id @default(uuid())
+  attendanceId String
+  serviceId    String
+  createdAt    DateTime @default(now())
+
+  attendance Attendance @relation(fields: [attendanceId], references: [id])
+  service    Service    @relation(fields: [serviceId], references: [id])
+}
+
+model AttendanceEmployee {
+  id           String   @id @default(uuid())
+  attendanceId String
+  employeeId   String
+  serviceId    String
+  createdAt    DateTime @default(now())
+
+  attendance Attendance @relation(fields: [attendanceId], references: [id])
+  employee   Employee   @relation(fields: [employeeId], references: [id])
+  service    Service    @relation(fields: [serviceId], references: [id])
+}
+
+model PasswordRecoveryToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model DefaultActivityService {
+  id                String   @id @default(uuid())
+  activityBranchId  String
+  name              String
+  description       String
+  isFavoriteDefault Boolean  @default(false)
+  createdAt         DateTime @default(now())
+
+  activityBranch ActivityBranch @relation(fields: [activityBranchId], references: [id])
 }
