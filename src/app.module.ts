@@ -15,9 +15,11 @@ import { AttendanceServicesModule } from './attendance-services/attendance-servi
 import { AttendanceEmployeesModule } from './attendance-employees/attendance-employees.module';
 import { PasswordRecoveryTokensModule } from './password-recovery-tokens/password-recovery-tokens.module';
 import { DefaultActivityServicesModule } from './default-activity-services/default-activity-services.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     PrismaModule,
     CompaniesModule,
     UsersModule,
