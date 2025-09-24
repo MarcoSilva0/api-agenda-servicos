@@ -1,6 +1,28 @@
 # 📅 API Agenda de Serviços
 
-> **Sistema de gerenciamento de agenda para pequenos negócios**
+> **Sistema de gerenciament### 👥 **Gestão de Colaboradores** 
+- Cadastro completo de funcionários
+- Upload e gerenciamento de fotos
+- Definição de preferências por serviço
+- Isolamento seguro por empresa
+- Paginação otimizada para grandes volumes
+
+### 📅 **Sistema de Agendamentos**
+- Criação de agendamentos com validação automática
+- Detecção e prevenção de conflitos de horário
+- Priorização de serviços favoritos na listagem
+- Ordenação inteligente de funcionários por preferência
+- Criação automática de clientes
+- Verificação de disponibilidade em tempo real
+- Gestão completa de status dos agendamentos
+
+## 🔄 Funcionalidades em Desenvolvimento
+
+### 📊 **Calendário e Visualização** (RF07)
+- Calendário interativo
+- Visualização por data específica
+- Notificações de agendamentos em atraso
+- Navegação entre datasra pequenos negócios**
 
 Uma API robusta desenvolvida em **NestJS** para gerenciar atendimentos e serviços prestados por pequenas empresas, permitindo fácil acesso e visualização dos dados através de aplicativos móveis desenvolvidos em React Native.
 
@@ -162,6 +184,34 @@ A API serve como backend para um aplicativo móvel que permite a pequenas empres
 }
 ```
 
+### 👤 **Client (Cliente)**
+```typescript
+{
+  id: string
+  companyId: string      // Empresa proprietária
+  name: string           // Nome completo do cliente
+  phone: string          // Telefone (usado como identificador único)
+  createdAt: Date
+  updatedAt: Date
+}
+```
+
+### 📅 **Appointment (Agendamento)**
+```typescript
+{
+  id: string
+  companyId: string      // Empresa proprietária
+  clientId: string       // Cliente (criado automaticamente se não existir)
+  serviceId: string      // Serviço agendado
+  employeeId?: string    // Funcionário designado (opcional)
+  appointmentDate: Date  // Data do agendamento
+  appointmentTime: Date  // Horário específico
+  status: 'scheduled' | 'completed' | 'cancelled'
+  createdAt: Date
+  updatedAt: Date
+}
+```
+
 ## 🔒 Segurança
 
 - **Autenticação JWT** obrigatória para rotas protegidas
@@ -208,6 +258,16 @@ Acesse `http://localhost:3000/api` para:
 - `DELETE /employees/:id` - Remover colaborador
 - `GET /employees/:id/service-preferences` - Buscar preferências de serviço
 - `POST /employees/:id/service-preferences` - Definir serviços que pode executar
+
+#### Agendamentos
+- `GET /appointments` - Listar agendamentos ordenados por data/hora
+- `POST /appointments` - Criar agendamento com validação de conflitos
+- `GET /appointments/:id` - Buscar agendamento específico
+- `PATCH /appointments/:id` - Atualizar agendamento existente
+- `DELETE /appointments/:id` - Excluir agendamento
+- `GET /appointments/check-availability` - Verificar disponibilidade de horário
+- `GET /appointments/services/by-favorites` - Serviços ordenados por favoritos
+- `GET /appointments/employees/by-service/:serviceId` - Funcionários por preferência
 
 ## 🚀 Como Executar
 
@@ -273,17 +333,34 @@ npx prisma studio
    ```
 4. **Consulte preferências**: `GET /employees/:id/service-preferences`
 
+### **🆕 Testando Agendamentos (RF06)**
+1. **Verificar disponibilidade**: `GET /appointments/check-availability?date=2025-09-25&time=14:30`
+2. **Listar serviços por favoritos**: `GET /appointments/services/by-favorites`
+3. **Criar agendamento**: `POST /appointments`
+   ```json
+   {
+     "clientName": "Maria Santos",
+     "clientPhone": "11999999999",
+     "appointmentDate": "2025-09-25",
+     "appointmentTime": "14:30",
+     "serviceId": "uuid-do-servico",
+     "employeeId": "uuid-do-funcionario"
+   }
+   ```
+4. **Listar agendamentos**: `GET /appointments?page=1&limit=10`
+5. **Buscar funcionários por preferência**: `GET /appointments/employees/by-service/:serviceId`
+
 ## 🎯 Roadmap
 
 ### **✅ Implementações Concluídas**
 - [x] **RF02** - Sistema de autenticação completo
 - [x] **RF03** - Gestão de ramos de atividade
 - [x] **RF04** - Gerenciamento de serviços
-- [x] **RF05** - Sistema de colaboradores ✨ **NOVO**
+- [x] **RF05** - Sistema de colaboradores
+- [x] **RF06** - Sistema de agendamentos ✨ **NOVO**
 - [x] **RF12** - Recuperação de senha
 
 ### **📋 Próximas Implementações**
-- [ ] **RF06** - Criação de agendamentos  
 - [ ] **RF07** - Calendário interativo
 - [ ] **RF08** - Gestão de atendimentos
 - [ ] **RF09** - Sistema de temas

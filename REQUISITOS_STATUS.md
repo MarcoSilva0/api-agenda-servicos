@@ -1,6 +1,6 @@
 # 📋 Requisitos Funcionais - Status de Implementação
 
-## ✅ **Implementados (5/11)**
+## ✅ **Implementados (6/11)**
 
 ### **RF02 - Entrada no sistema**
 - ✅ Registro de usuário e empresa
@@ -39,29 +39,34 @@
 ✅ GET    /employees/:id/service-preferences - Buscar preferências
 ```
 
+### **RF06 - Agendamentos**
+- ✅ Criação de agendamentos
+- ✅ Validação de conflitos
+- ✅ Seleção de profissional
+- ✅ Priorização de favoritos
+- ✅ Criação automática de clientes
+- ✅ Verificação de disponibilidade
+- ✅ Listagem ordenada por data/hora
+
+**Endpoints implementados**:
+```
+✅ GET    /appointments                 - Listar agendamentos
+✅ POST   /appointments                 - Criar agendamento
+✅ PATCH  /appointments/:id            - Atualizar agendamento
+✅ GET    /appointments/:id            - Buscar agendamento
+✅ DELETE /appointments/:id            - Excluir agendamento
+✅ GET    /appointments/check-availability - Verificar disponibilidade
+✅ GET    /appointments/services/by-favorites - Serviços por favoritos
+✅ GET    /appointments/employees/by-service/:serviceId - Funcionários por preferência
+```
+
 ### **RF12 - Recuperação de senha**
 - ✅ Solicitação via email
 - ✅ Reset com token
 - ✅ Hash seguro de senhas
 - ✅ Controle de expiração
 
-## ❌ **Faltam Implementar (7/11)**
-
-### **RF06 - Agendamentos**
-**Prioridade**: Alta
-- ❌ Criação de agendamentos
-- ❌ Validação de conflitos
-- ❌ Seleção de profissional
-- ❌ Priorização de favoritos
-
-**Endpoints necessários**:
-```
-GET    /appointments
-POST   /appointments
-PUT    /appointments/:id
-DELETE /appointments/:id
-GET    /appointments/check-availability
-```
+## ❌ **Faltam Implementar (6/11)**
 
 ### **RF07 - Calendário**
 **Prioridade**: Alta
@@ -141,7 +146,7 @@ DELETE /clients/:id
 
 ### **Fase 1 - Core Business (Prioridade Alta)**
 1. ✅ **RF05 - Colaboradores** → Base para agendamentos ✨ **CONCLUÍDO**
-2. **RF06 - Agendamentos** → Funcionalidade principal
+2. ✅ **RF06 - Agendamentos** → Funcionalidade principal ✨ **CONCLUÍDO**
 3. **RF07 - Calendário** → Visualização essencial
 4. **RF08 - Atendimentos** → Conversão do agendamento
 
@@ -158,7 +163,7 @@ DELETE /clients/:id
 | RF | Funcionalidade | Complexidade | Endpoints | Status |
 |----|---------------|--------------|-----------|---------|
 | RF05 | Colaboradores | Média | 7 | ✅ **CONCLUÍDO** |
-| RF06 | Agendamentos | Alta | 5 | ❌ Pendente |
+| RF06 | Agendamentos | Alta | 8 | ✅ **CONCLUÍDO** |
 | RF07 | Calendário | Média | 3 | ❌ Pendente |
 | RF08 | Atendimentos | Alta | 7 | ❌ Pendente |
 | RF11 | Relatórios | Média | 5 | ❌ Pendente |
@@ -166,4 +171,4 @@ DELETE /clients/:id
 | RF09 | Tema | Baixa | 2 | ❌ Pendente |
 | RF01 | Onboarding | Baixa | 0 | ❌ Pendente |
 
-**Total estimado restante**: 12-18 dias de desenvolvimento
+**Total estimado restante**: 8-12 dias de desenvolvimento
