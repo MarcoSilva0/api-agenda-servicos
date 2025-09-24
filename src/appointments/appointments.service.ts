@@ -5,6 +5,8 @@ import { UpdateAppointmentDto, AppointmentStatus } from './dto/update-appointmen
 import { CheckAvailabilityDto } from './dto/check-availability.dto';
 import { AppointmentResponseDto } from './dto/appointment-response.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
+import { CalendarQueryDto } from './dto/calendar.dto';
+import { CalendarResponseDto, CalendarDayDto } from './dto/calendar-response.dto';
 
 @Injectable()
 export class AppointmentsService {
@@ -419,5 +421,118 @@ export class AppointmentsService {
       createdAt: appointment.createdAt,
       updatedAt: appointment.updatedAt,
     };
+  }
+
+  // Métodos para Calendário (RF07)
+  async getCalendar(companyId: string, calendarQuery: CalendarQueryDto): Promise<CalendarResponseDto> {
+    const { startDate, endDate } = calendarQuery;
+    
+    // Se não informado, usar período padrão de 30 dias a partir de hoje
+    const now = new Date();
+    const defaultStart = new Date(now.getFullYear(), now.getMonth(), 1); // Primeiro dia do mês
+    const defaultEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999); // Último dia do mês
+    
+    const periodStart = startDate ? new Date(startDate) : defaultStart;
+    const periodEnd = endDate ? new Date(endDate) : defaultEnd;
+
+    const appointments = await this.prisma.appointment.findMany({
+      where: {
+        companyId,
+        appointmentDateStart: {
+          gte: periodStart,
+          lte: periodEnd,
+        },
+      },
+      orderBy: [
+        { appointmentDateStart: 'asc' },
+      ],
+      include: {
+        client: true,
+        service: true,
+        employee: true,
+      },
+    });
+
+    // Agrupar por data
+    const dayGroups = new Map<string, any[]>();
+    
+    appointments.forEach(appointment => {
+      const date = appointment.appointmentDateStart.toISOString().split('T')[0];
+      if (!dayGroups.has(date)) {
+        dayGroups.set(date, []);
+      }
+      dayGroups.get(date)!.push(appointment);
+    });
+
+    // Criar resposta do calendário
+    const days: CalendarDayDto[] = Array.from(dayGroups.entries()).map(([date, dayAppointments]) => {
+      const now = new Date();
+      const overdueCount = dayAppointments.filter(appointment => 
+        appointment.appointmentDateStart < now && appointment.status === 'scheduled'
+      ).length;
+
+      return {
+        date,
+        totalAppointments: dayAppointments.length,
+        appointments: dayAppointments.map(appointment => this.formatAppointmentResponse(appointment)),
+        overdueCount,
+      };
+    });
+
+    return {
+      days: days.sort((a, b) => a.date.localeCompare(b.date)),
+      totalAppointments: appointments.length,
+      totalDays: days.length,
+    };
+  }
+
+  async getAppointmentsByDate(companyId: string, date: string): Promise<AppointmentResponseDto[]> {
+    // Criar início e fim do dia
+    const startDate = new Date(`${date}T00:00:00.000Z`);
+    const endDate = new Date(`${date}T23:59:59.999Z`);
+
+    const appointments = await this.prisma.appointment.findMany({
+      where: {
+        companyId,
+        appointmentDateStart: {
+          gte: startDate,
+          lt: endDate,
+        },
+      },
+      orderBy: [
+        { appointmentDateStart: 'asc' },
+      ],
+      include: {
+        client: true,
+        service: true,
+        employee: true,
+      },
+    });
+
+    return appointments.map(appointment => this.formatAppointmentResponse(appointment));
+  }
+
+  async getOverdueAppointments(companyId: string): Promise<AppointmentResponseDto[]> {
+    const now = new Date();
+
+    const appointments = await this.prisma.appointment.findMany({
+      where: {
+        companyId,
+        appointmentDateStart: {
+          lt: now,
+        },
+        status: 'scheduled', // Apenas agendamentos que ainda não foram atendidos
+      },
+      orderBy: [
+        { appointmentDateStart: 'desc' }, // Mais recentes primeiro
+      ],
+      include: {
+        client: true,
+        service: true,
+        employee: true,
+      },
+    });
+
+    return appointments.map(appointment => this.formatAppointmentResponse(appointment));
   }
 }

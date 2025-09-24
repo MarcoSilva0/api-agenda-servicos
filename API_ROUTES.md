@@ -41,11 +41,16 @@
 - `DELETE /clients/:id` - Excluir cliente
 
 ## 📅 Agendamentos
-- `GET /appointments` - Listar agendamentos do dia (RF07)
+- `GET /appointments` - Listar agendamentos (RF06)
 - `GET /appointments/calendar` - Visualizar calendário (RF07)
+- `GET /appointments/date/:date` - Agendamentos por data específica (RF07)
+- `GET /appointments/overdue` - Agendamentos em atraso (RF07)
+- `GET /appointments/check-availability` - Verificar disponibilidade (RF06)
+- `GET /appointments/services/by-favorites` - Serviços ordenados por favoritos (RF06)
+- `GET /appointments/employees/by-service/:serviceId` - Funcionários por preferência (RF06)
 - `GET /appointments/:id` - Buscar agendamento específico
 - `POST /appointments` - Criar novo agendamento (RF06)
-- `PUT /appointments/:id` - Atualizar agendamento (RF06)
+- `PATCH /appointments/:id` - Atualizar agendamento (RF06)
 - `DELETE /appointments/:id` - Cancelar agendamento (RF06)
 
 ## 🏥 Atendimentos

@@ -1,6 +1,6 @@
 # 📋 Requisitos Funcionais - Status de Implementação
 
-## ✅ **Implementados (6/11)**
+## ✅ **Implementados (7/11)**
 
 ### **RF02 - Entrada no sistema**
 - ✅ Registro de usuário e empresa
@@ -60,27 +60,26 @@
 ✅ GET    /appointments/employees/by-service/:serviceId - Funcionários por preferência
 ```
 
+### **RF07 - Calendário**
+- ✅ Visualização por data
+- ✅ Ordenação por horário
+- ✅ Destaque de atrasos
+- ✅ Navegação entre datas
+
+**Endpoints implementados**:
+```
+✅ GET    /appointments/calendar        - Visualizar calendário de agendamentos
+✅ GET    /appointments/date/:date      - Buscar agendamentos por data específica
+✅ GET    /appointments/overdue         - Listar agendamentos em atraso
+```
+
 ### **RF12 - Recuperação de senha**
 - ✅ Solicitação via email
 - ✅ Reset com token
 - ✅ Hash seguro de senhas
 - ✅ Controle de expiração
 
-## ❌ **Faltam Implementar (6/11)**
-
-### **RF07 - Calendário**
-**Prioridade**: Alta
-- ❌ Visualização por data
-- ❌ Ordenação por horário
-- ❌ Destaque de atrasos
-- ❌ Navegação entre datas
-
-**Endpoints necessários**:
-```
-GET    /appointments/calendar
-GET    /appointments/date/:date
-GET    /appointments/overdue
-```
+## ❌ **Faltam Implementar (5/11)**
 
 ### **RF08 - Atendimentos**
 **Prioridade**: Alta
@@ -147,7 +146,7 @@ DELETE /clients/:id
 ### **Fase 1 - Core Business (Prioridade Alta)**
 1. ✅ **RF05 - Colaboradores** → Base para agendamentos ✨ **CONCLUÍDO**
 2. ✅ **RF06 - Agendamentos** → Funcionalidade principal ✨ **CONCLUÍDO**
-3. **RF07 - Calendário** → Visualização essencial
+3. ✅ **RF07 - Calendário** → Visualização essencial ✨ **CONCLUÍDO**
 4. **RF08 - Atendimentos** → Conversão do agendamento
 
 ### **Fase 2 - Melhorias (Prioridade Média)**
@@ -164,11 +163,11 @@ DELETE /clients/:id
 |----|---------------|--------------|-----------|---------|
 | RF05 | Colaboradores | Média | 7 | ✅ **CONCLUÍDO** |
 | RF06 | Agendamentos | Alta | 8 | ✅ **CONCLUÍDO** |
-| RF07 | Calendário | Média | 3 | ❌ Pendente |
+| RF07 | Calendário | Média | 3 | ✅ **CONCLUÍDO** |
 | RF08 | Atendimentos | Alta | 7 | ❌ Pendente |
 | RF11 | Relatórios | Média | 5 | ❌ Pendente |
 | RF10 | Compartilhamento | Baixa | 3 | ❌ Pendente |
 | RF09 | Tema | Baixa | 2 | ❌ Pendente |
 | RF01 | Onboarding | Baixa | 0 | ❌ Pendente |
 
-**Total estimado restante**: 8-12 dias de desenvolvimento
+**Total estimado restante**: 6-10 dias de desenvolvimento

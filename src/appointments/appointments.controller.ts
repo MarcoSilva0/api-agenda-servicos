@@ -10,6 +10,7 @@ import {
   UseGuards,
   Request,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -25,6 +26,8 @@ import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { CheckAvailabilityDto } from './dto/check-availability.dto';
 import { AppointmentResponseDto } from './dto/appointment-response.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
+import { CalendarQueryDto } from './dto/calendar.dto';
+import { CalendarResponseDto } from './dto/calendar-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Agendamentos')
@@ -346,5 +349,100 @@ export class AppointmentsController {
   })
   async remove(@Param('id') id: string, @Request() req: any) {
     return this.appointmentsService.remove(id, req.user.companyId);
+  }
+
+  // Endpoints para Calendário (RF07)
+  @Get('calendar')
+  @ApiOperation({
+    summary: 'Visualizar calendário de agendamentos',
+    description: 'Retorna agendamentos agrupados por data para visualização em calendário',
+  })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    type: String,
+    description: 'Data inicial (formato ISO 8601). Se não informada, usa primeiro dia do mês atual',
+    example: '2025-09-01T00:00:00.000Z',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    type: String,
+    description: 'Data final (formato ISO 8601). Se não informada, usa último dia do mês atual',
+    example: '2025-09-30T23:59:59.999Z',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Calendário de agendamentos retornado com sucesso',
+    type: CalendarResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Parâmetros de data inválidos',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Token de autenticação inválido ou ausente',
+  })
+  async getCalendar(
+    @Query() calendarQuery: CalendarQueryDto,
+    @Request() req: any,
+  ): Promise<CalendarResponseDto> {
+    return this.appointmentsService.getCalendar(req.user.companyId, calendarQuery);
+  }
+
+  @Get('date/:date')
+  @ApiOperation({
+    summary: 'Buscar agendamentos por data específica',
+    description: 'Retorna todos os agendamentos de uma data específica ordenados por horário',
+  })
+  @ApiParam({
+    name: 'date',
+    description: 'Data no formato YYYY-MM-DD',
+    type: 'string',
+    example: '2025-09-25',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Agendamentos da data retornados com sucesso',
+    type: [AppointmentResponseDto],
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Formato de data inválido',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Token de autenticação inválido ou ausente',
+  })
+  async getAppointmentsByDate(
+    @Param('date') date: string,
+    @Request() req: any,
+  ): Promise<AppointmentResponseDto[]> {
+    // Validação básica do formato de data
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(date)) {
+      throw new BadRequestException('Formato de data inválido. Use YYYY-MM-DD');
+    }
+
+    return this.appointmentsService.getAppointmentsByDate(req.user.companyId, date);
+  }
+
+  @Get('overdue')
+  @ApiOperation({
+    summary: 'Listar agendamentos em atraso',
+    description: 'Retorna agendamentos que já passaram do horário mas ainda estão com status "scheduled"',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Agendamentos em atraso retornados com sucesso',
+    type: [AppointmentResponseDto],
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Token de autenticação inválido ou ausente',
+  })
+  async getOverdueAppointments(@Request() req: any): Promise<AppointmentResponseDto[]> {
+    return this.appointmentsService.getOverdueAppointments(req.user.companyId);
   }
 }

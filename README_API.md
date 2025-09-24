@@ -46,6 +46,32 @@ A API foi implementada com sucesso, seguindo os requisitos funcionais especifica
 | PUT | `/services/:id/toggle-favorite` | Alternar favorito | RF04 |
 | DELETE | `/services/:id` | Excluir serviço | RF04 |
 
+### 👥 **Funcionários/Colaboradores** (`/employees`)
+| Método | Rota | Descrição | RF |
+|--------|------|-----------|----| 
+| GET | `/employees` | Listar colaboradores | RF05 |
+| GET | `/employees/:id` | Buscar colaborador específico | RF05 |
+| POST | `/employees` | Criar colaborador | RF05 |
+| PATCH | `/employees/:id` | Atualizar colaborador | RF05 |
+| DELETE | `/employees/:id` | Excluir colaborador | RF05 |
+| GET | `/employees/:id/service-preferences` | Buscar preferências | RF05 |
+| POST | `/employees/:id/service-preferences` | Definir preferências | RF05 |
+
+### 📅 **Agendamentos** (`/appointments`)
+| Método | Rota | Descrição | RF |
+|--------|------|-----------|----| 
+| GET | `/appointments` | Listar agendamentos | RF06 |
+| GET | `/appointments/calendar` | Visualizar calendário | RF07 |
+| GET | `/appointments/date/:date` | Agendamentos por data | RF07 |
+| GET | `/appointments/overdue` | Agendamentos em atraso | RF07 |
+| GET | `/appointments/check-availability` | Verificar disponibilidade | RF06 |
+| GET | `/appointments/services/by-favorites` | Serviços por favoritos | RF06 |
+| GET | `/appointments/employees/by-service/:serviceId` | Funcionários por preferência | RF06 |
+| GET | `/appointments/:id` | Buscar agendamento específico | RF06 |
+| POST | `/appointments` | Criar agendamento | RF06 |
+| PATCH | `/appointments/:id` | Atualizar agendamento | RF06 |
+| DELETE | `/appointments/:id` | Excluir agendamento | RF06 |
+
 ## 🎯 Requisitos Funcionais Implementados
 
 ### ✅ **RF02 - Entrada no sistema**
@@ -65,6 +91,26 @@ A API foi implementada com sucesso, seguindo os requisitos funcionais especifica
 - Marcação de favoritos
 - Importação de ramos de atividade
 - Ordenação por favoritos
+
+### ✅ **RF05 - Colaboradores**
+- CRUD completo de colaboradores
+- Upload de fotos (campo photoUrl)
+- Preferências por serviço
+- Vinculação com serviços
+- Isolamento por empresa
+
+### ✅ **RF06 - Agendamentos**
+- Criação de agendamentos com validação de conflitos
+- Seleção de profissional com priorização de favoritos
+- Criação automática de clientes
+- Verificação de disponibilidade
+- Sistema completo de gestão de agendamentos
+
+### ✅ **RF07 - Calendário**
+- Visualização de agendamentos por período
+- Navegação por data específica
+- Identificação de agendamentos em atraso
+- Agrupamento por dias com estatísticas
 
 ### ✅ **RF12 - Recuperação de senha**
 - Solicitação de recuperação
@@ -127,12 +173,11 @@ Acesse `http://localhost:3000/api` para:
 
 Para completar todos os requisitos funcionais, implemente:
 
-- **RF05** - Colaboradores (já tem estrutura)
-- **RF06** - Agendamentos 
-- **RF07** - Calendário
-- **RF08** - Atendimentos
-- **RF09** - Tema do aplicativo
+- **RF08** - Atendimentos (conversão de agendamentos)
+- **RF09** - Tema do aplicativo  
 - **RF10** - Compartilhamento
 - **RF11** - Relatório de clientes
 
 A base está sólida e escalável para implementar as funcionalidades restantes! 🚀
+
+**Status atual**: 7 de 11 requisitos funcionais implementados (64% concluído)
