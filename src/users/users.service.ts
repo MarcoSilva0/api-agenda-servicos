@@ -7,6 +7,58 @@ import { ThemeResponseDto } from './dto/theme-response.dto';
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async getProfile(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        companyId: true,
+        themePreference: true,
+        biometricAuthEnabled: true,
+        emailConfirmed: true,
+        firstAccessCompleted: true,
+        createdAt: true,
+        updatedAt: true,
+        company: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            address: true,
+            logoUrl: true,
+            customShareTemplate: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      companyId: user.companyId,
+      themePreference: user.themePreference,
+      biometricAuthEnabled: user.biometricAuthEnabled,
+      emailConfirmed: user.emailConfirmed,
+      firstAccessCompleted: user.firstAccessCompleted,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      company: user.company,
+    };
+  }
+
   async getTheme(userId: string, requestingUserId: string): Promise<ThemeResponseDto> {
     // Verificar se o usuário está tentando acessar seu próprio tema ou é admin
     if (userId !== requestingUserId) {

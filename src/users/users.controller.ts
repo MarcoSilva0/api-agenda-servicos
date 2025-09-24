@@ -18,6 +18,7 @@ import {
 import { UsersService } from './users.service';
 import { UpdateThemeDto } from './dto/update-theme.dto';
 import { ThemeResponseDto } from './dto/theme-response.dto';
+import { UserProfileResponseDto } from './dto/user-profile-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('Usuários')
@@ -26,6 +27,24 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 @ApiBearerAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Get('profile')
+  @ApiOperation({
+    summary: 'Obter perfil do usuário logado',
+    description: 'Retorna as informações do perfil do usuário autenticado',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Perfil do usuário retornado com sucesso',
+    type: UserProfileResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Token inválido ou não fornecido',
+  })
+  async getProfile(@Request() req) {
+    return this.usersService.getProfile(req.user.sub);
+  }
 
   @Get(':id/theme')
   @ApiOperation({

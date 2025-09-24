@@ -65,7 +65,13 @@ export class AuthService {
     });
 
     // Gerar JWT
-    const payload = { sub: result.user.id, email: result.user.email };
+    const payload = { 
+      sub: result.user.id, 
+      email: result.user.email,
+      name: result.user.name,
+      companyId: result.user.companyId,
+      role: result.user.role
+    };
     const access_token = this.jwtService.sign(payload);
 
     return {
@@ -105,7 +111,13 @@ export class AuthService {
     }
 
     // Gerar JWT
-    const payload = { sub: user.id, email: user.email };
+    const payload = { 
+      sub: user.id, 
+      email: user.email,
+      name: user.name,
+      companyId: user.companyId,
+      role: user.role
+    };
     const access_token = this.jwtService.sign(payload);
 
     return {

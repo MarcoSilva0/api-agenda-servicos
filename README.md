@@ -352,20 +352,21 @@ npx prisma studio
 
 ## 🎯 Roadmap
 
-### **✅ Implementações Concluídas**
+### ✅ Implementações Concluídas
 - [x] **RF02** - Sistema de autenticação completo
 - [x] **RF03** - Gestão de ramos de atividade
 - [x] **RF04** - Gerenciamento de serviços
 - [x] **RF05** - Sistema de colaboradores
 - [x] **RF06** - Sistema de agendamentos ✨ **NOVO**
+- [x] **RF07** - Calendário interativo ✨ **NOVO**
+- [x] **RF08** - Gestão de atendimentos ✨ **NOVO**
+- [x] **RF09** - Sistema de temas ✨ **NOVO**
+- [x] **RF10** - Compartilhamento personalizado ✨ **NOVO**
+- [x] **RF11** - Relatórios de clientes ✨ **NOVO**
 - [x] **RF12** - Recuperação de senha
 
-### **📋 Próximas Implementações**
-- [ ] **RF07** - Calendário interativo
-- [ ] **RF08** - Gestão de atendimentos
-- [ ] **RF09** - Sistema de temas
-- [ ] **RF10** - Compartilhamento personalizado
-- [ ] **RF11** - Relatórios avançados
+### 📋 Próximas Implementações
+- [ ] **RF01** - Primeira utilização (principalmente frontend)
 
 ### **Melhorias Futuras**
 - [ ] Notificações push

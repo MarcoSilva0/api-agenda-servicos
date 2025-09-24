@@ -34,15 +34,16 @@
 - `POST /employees/:id/service-preferences` - Definir preferências de serviços (RF05)
 
 ## 👤 Usuários
+- `GET /users/profile` - Obter perfil do usuário logado
 - `GET /users/:id/theme` - Obter tema do usuário (RF09)
 - `PUT /users/:id/theme` - Alterar tema do usuário (RF09)
 
 ## 👤 Clientes
-- `GET /clients` - Listar clientes (RF11)
+- `GET /clients` - Listar clientes da empresa (RF11)
 - `GET /clients/report` - Relatório de clientes com filtros (RF11)
 - `GET /clients/:id` - Buscar cliente específico
 - `POST /clients` - Criar novo cliente
-- `PUT /clients/:id` - Atualizar cliente
+- `PATCH /clients/:id` - Atualizar cliente
 - `DELETE /clients/:id` - Excluir cliente
 
 ## 📅 Agendamentos

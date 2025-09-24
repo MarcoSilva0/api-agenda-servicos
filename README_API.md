@@ -75,8 +75,19 @@ A API foi implementada com sucesso, seguindo os requisitos funcionais especifica
 ### 👤 **Usuários** (`/users`)
 | Método | Rota | Descrição | RF |
 |--------|------|-----------|----| 
+| GET | `/users/profile` | Obter perfil do usuário logado | - |
 | GET | `/users/:id/theme` | Obter tema do usuário | RF09 |
 | PUT | `/users/:id/theme` | Alterar tema do usuário | RF09 |
+
+### 👤 **Clientes** (`/clients`)
+| Método | Rota | Descrição | RF |
+|--------|------|-----------|----| 
+| GET | `/clients` | Listar clientes da empresa | RF11 |
+| GET | `/clients/report` | Relatório com filtros avançados | RF11 |
+| GET | `/clients/:id` | Buscar cliente específico | RF11 |
+| POST | `/clients` | Criar novo cliente | RF11 |
+| PATCH | `/clients/:id` | Atualizar cliente | RF11 |
+| DELETE | `/clients/:id` | Excluir cliente | RF11 |
 
 ### 🏥 **Atendimentos** (`/attendances`)
 | Método | Rota | Descrição | RF |
@@ -155,6 +166,15 @@ A API foi implementada com sucesso, seguindo os requisitos funcionais especifica
 - Formatação automática de dados do atendimento
 - Suporte a variáveis como {companyName}, {services}, etc.
 
+### ✅ **RF11 - Relatório de clientes**
+- Listagem de clientes da empresa
+- Filtros avançados por período (startDate/endDate)
+- Filtros por mês e ano específicos
+- Filtro por nome do cliente
+- Ordenação alfabética
+- Paginação completa
+- Informações de último atendimento e total de atendimentos
+
 ### ✅ **RF12 - Recuperação de senha**
 - Solicitação de recuperação
 - Reset com token
@@ -214,11 +234,10 @@ Acesse `http://localhost:3000/api` para:
 
 ## 🎯 Próximos Passos
 
-Para completar todos os requisitos funcionais, implemente:
+Para completar todos os requisitos funcionais, resta apenas implementar:
 
-- **RF01** - Primeira utilização (principalmente frontend)
-- **RF11** - Relatório de clientes
+- **RF01** - Primeira utilização (principalmente frontend - onboarding)
 
 A base está sólida e escalável para implementar as funcionalidades restantes! 🚀
 
-**Status atual**: 10 de 11 requisitos funcionais implementados (91% concluído)
+**Status atual**: 11 de 11 requisitos funcionais implementados (100% backend concluído)
