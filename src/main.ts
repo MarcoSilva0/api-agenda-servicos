@@ -14,8 +14,9 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('API Agenda Serviços')
-    .setDescription('')
+    .setDescription('API para gerenciamento de agenda de serviços para pequenos negócios')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document, {

@@ -16,6 +16,7 @@ import { AttendanceEmployeesModule } from './attendance-employees/attendance-emp
 import { PasswordRecoveryTokensModule } from './password-recovery-tokens/password-recovery-tokens.module';
 import { DefaultActivityServicesModule } from './default-activity-services/default-activity-services.module';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ConfigModule } from '@nestjs/config';
     AttendanceEmployeesModule,
     PasswordRecoveryTokensModule,
     DefaultActivityServicesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

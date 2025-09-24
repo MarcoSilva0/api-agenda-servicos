@@ -1,4 +1,164 @@
-import { Controller } from '@nestjs/common';
+import { 
+  Controller, 
+  Get, 
+  Post, 
+  Put, 
+  Delete, 
+  Param, 
+  Body, 
+  Query,
+  UseGuards,
+  Request 
+} from '@nestjs/common';
+import { 
+  ApiTags, 
+  ApiOperation, 
+  ApiResponse, 
+  ApiParam, 
+  ApiBearerAuth,
+  ApiQuery
+} from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ServicesService } from './services.service';
+import { 
+  CreateServiceDto, 
+  UpdateServiceDto, 
+  ImportServicesDto,
+  ServiceResponseDto 
+} from './dto/service.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
 
+@ApiTags('Serviços')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('services')
-export class ServicesController {}
+export class ServicesController {
+  constructor(private readonly servicesService: ServicesService) {}
+
+  @Get()
+  @ApiOperation({ 
+    summary: 'Listar serviços da empresa',
+    description: 'Lista todos os serviços da empresa do usuário logado (RF04)'
+  })
+  @ApiQuery({ type: PaginationDto })
+  @ApiQuery({ name: 'favorites', required: false, type: Boolean, description: 'Filtrar apenas favoritos' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de serviços',
+    type: [ServiceResponseDto],
+  })
+  async findAll(
+    @Request() req,
+    @Query() paginationDto: PaginationDto,
+    @Query('favorites') favorites?: boolean,
+  ) {
+    return this.servicesService.findAll(req.user.companyId, paginationDto, favorites);
+  }
+
+  @Get('favorites')
+  @ApiOperation({ 
+    summary: 'Listar serviços favoritos',
+    description: 'Lista apenas os serviços marcados como favoritos (RF04)'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de serviços favoritos',
+    type: [ServiceResponseDto],
+  })
+  async findFavorites(@Request() req) {
+    return this.servicesService.findFavorites(req.user.companyId);
+  }
+
+  @Get(':id')
+  @ApiOperation({ 
+    summary: 'Buscar serviço por ID',
+    description: 'Retorna um serviço específico da empresa'
+  })
+  @ApiParam({ name: 'id', description: 'ID do serviço' })
+  @ApiResponse({
+    status: 200,
+    description: 'Serviço encontrado',
+    type: ServiceResponseDto,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Serviço não encontrado',
+  })
+  async findOne(@Request() req, @Param('id') id: string) {
+    return this.servicesService.findOne(id, req.user.companyId);
+  }
+
+  @Post()
+  @ApiOperation({ 
+    summary: 'Criar novo serviço',
+    description: 'Cria um novo serviço para a empresa (RF04)'
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Serviço criado com sucesso',
+    type: ServiceResponseDto,
+  })
+  async create(@Request() req, @Body() createServiceDto: CreateServiceDto) {
+    return this.servicesService.create(req.user.companyId, createServiceDto);
+  }
+
+  @Post('import')
+  @ApiOperation({ 
+    summary: 'Importar serviços do ramo de atividade',
+    description: 'Importa serviços comuns de um ramo de atividade (RF03)'
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Serviços importados com sucesso',
+  })
+  async importServices(@Request() req, @Body() importServicesDto: ImportServicesDto) {
+    return this.servicesService.importServices(req.user.companyId, importServicesDto.activityBranchId);
+  }
+
+  @Put(':id')
+  @ApiOperation({ 
+    summary: 'Atualizar serviço',
+    description: 'Atualiza os dados de um serviço (RF04)'
+  })
+  @ApiParam({ name: 'id', description: 'ID do serviço' })
+  @ApiResponse({
+    status: 200,
+    description: 'Serviço atualizado com sucesso',
+    type: ServiceResponseDto,
+  })
+  async update(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() updateServiceDto: UpdateServiceDto,
+  ) {
+    return this.servicesService.update(id, req.user.companyId, updateServiceDto);
+  }
+
+  @Put(':id/toggle-favorite')
+  @ApiOperation({ 
+    summary: 'Alternar favorito do serviço',
+    description: 'Marca ou desmarca um serviço como favorito (RF04)'
+  })
+  @ApiParam({ name: 'id', description: 'ID do serviço' })
+  @ApiResponse({
+    status: 200,
+    description: 'Status de favorito alterado com sucesso',
+  })
+  async toggleFavorite(@Request() req, @Param('id') id: string) {
+    return this.servicesService.toggleFavorite(id, req.user.companyId);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ 
+    summary: 'Excluir serviço',
+    description: 'Remove um serviço da empresa (RF04)'
+  })
+  @ApiParam({ name: 'id', description: 'ID do serviço' })
+  @ApiResponse({
+    status: 200,
+    description: 'Serviço excluído com sucesso',
+  })
+  async remove(@Request() req, @Param('id') id: string) {
+    return this.servicesService.remove(id, req.user.companyId);
+  }
+}
