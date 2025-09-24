@@ -1,6 +1,6 @@
 # 📋 Requisitos Funcionais - Status de Implementação
 
-## ✅ **Implementados (7/11)**
+## ✅ **Implementados (10/11)**
 
 ### **RF02 - Entrada no sistema**
 - ✅ Registro de usuário e empresa
@@ -73,56 +73,66 @@
 ✅ GET    /appointments/overdue         - Listar agendamentos em atraso
 ```
 
+### **RF08 - Atendimentos**
+- ✅ Conversão agendamento → atendimento
+- ✅ Edição de serviços
+- ✅ Adição de colaboradores
+- ✅ Finalização de atendimento
+
+**Endpoints implementados**:
+```
+✅ GET    /attendances                 - Listar atendimentos
+✅ POST   /attendances                 - Criar atendimento (a partir de agendamento)
+✅ PATCH  /attendances/:id            - Atualizar atendimento
+✅ GET    /attendances/:id            - Buscar atendimento específico
+✅ POST   /attendances/:id/complete   - Finalizar atendimento
+✅ GET    /attendances/:id/services   - Listar serviços do atendimento
+✅ POST   /attendances/:id/services   - Adicionar serviço ao atendimento
+✅ DELETE /attendances/:id/services/:serviceId - Remover serviço do atendimento
+✅ POST   /attendances/:id/share      - Gerar texto para compartilhamento
+```
+
+### **RF09 - Tema do aplicativo**
+- ✅ Seleção de tema
+- ✅ Aplicação em todas as telas (dados persistidos)
+- ✅ Persistência da preferência
+
+**Endpoints implementados**:
+```
+✅ GET    /users/:id/theme            - Obter tema do usuário
+✅ PUT    /users/:id/theme            - Atualizar tema do usuário
+```
+
+### **RF10 - Compartilhamento**
+- ✅ Geração de texto personalizado
+- ✅ Compartilhamento via apps (texto formatado)
+- ✅ Templates editáveis
+- ✅ Cópia para área de transferência (texto pronto)
+
+**Endpoints implementados**:
+```
+✅ POST   /attendances/:id/share      - Gerar texto para compartilhamento
+✅ GET    /companies/share-template   - Obter template de compartilhamento
+✅ PUT    /companies/share-template   - Atualizar template de compartilhamento
+```
+
 ### **RF12 - Recuperação de senha**
 - ✅ Solicitação via email
 - ✅ Reset com token
 - ✅ Hash seguro de senhas
 - ✅ Controle de expiração
 
-## ❌ **Faltam Implementar (5/11)**
+## ❌ **Faltam Implementar (2/11)**
 
-### **RF08 - Atendimentos**
-**Prioridade**: Alta
-- ❌ Conversão agendamento → atendimento
-- ❌ Edição de serviços
-- ❌ Adição de colaboradores
-- ❌ Finalização de atendimento
-
-**Endpoints necessários**:
-```
-GET    /attendances
-POST   /attendances (from appointment)
-PUT    /attendances/:id
-POST   /attendances/:id/complete
-GET    /attendances/:id/services
-POST   /attendances/:id/services
-DELETE /attendances/:id/services/:serviceId
-```
-
-### **RF09 - Tema do aplicativo**
-**Prioridade**: Média (Principalmente frontend)
-- ❌ Seleção de tema
-- ❌ Aplicação em todas as telas
-- ❌ Persistência da preferência
+### **RF01 - Primeira utilização**
+**Prioridade**: Baixa (Frontend)
+- ❌ Mensagem de boas-vindas
+- ❌ Apresentação das funcionalidades
+- ❌ Controle de primeira execução
 
 **Endpoints necessários**:
 ```
-GET    /companies/theme
-PUT    /companies/theme
-```
-
-### **RF10 - Compartilhamento**
-**Prioridade**: Média
-- ❌ Geração de texto personalizado
-- ❌ Compartilhamento via apps
-- ❌ Templates editáveis
-- ❌ Cópia para área de transferência
-
-**Endpoints necessários**:
-```
-POST   /attendances/:id/share
-GET    /companies/share-template
-PUT    /companies/share-template
+Não requer endpoints específicos (principalmente frontend)
 ```
 
 ### **RF11 - Relatório de clientes**
@@ -147,12 +157,12 @@ DELETE /clients/:id
 1. ✅ **RF05 - Colaboradores** → Base para agendamentos ✨ **CONCLUÍDO**
 2. ✅ **RF06 - Agendamentos** → Funcionalidade principal ✨ **CONCLUÍDO**
 3. ✅ **RF07 - Calendário** → Visualização essencial ✨ **CONCLUÍDO**
-4. **RF08 - Atendimentos** → Conversão do agendamento
+4. ✅ **RF08 - Atendimentos** → Conversão do agendamento ✨ **CONCLUÍDO**
 
 ### **Fase 2 - Melhorias (Prioridade Média)**
 5. **RF11 - Relatório de clientes** → Analytics básicos
-6. **RF10 - Compartilhamento** → Experiência do usuário
-7. **RF09 - Tema** → Personalização
+6. ✅ **RF10 - Compartilhamento** → Experiência do usuário ✨ **CONCLUÍDO**
+7. ✅ **RF09 - Tema** → Personalização ✨ **CONCLUÍDO**
 
 ### **Fase 3 - UX (Prioridade Baixa)**
 8. **RF01 - Primeira utilização** → Onboarding
@@ -162,12 +172,12 @@ DELETE /clients/:id
 | RF | Funcionalidade | Complexidade | Endpoints | Status |
 |----|---------------|--------------|-----------|---------|
 | RF05 | Colaboradores | Média | 7 | ✅ **CONCLUÍDO** |
-| RF06 | Agendamentos | Alta | 8 | ✅ **CONCLUÍDO** |
+| RF06 | Agendamentos | Alta | 11 | ✅ **CONCLUÍDO** |
 | RF07 | Calendário | Média | 3 | ✅ **CONCLUÍDO** |
-| RF08 | Atendimentos | Alta | 7 | ❌ Pendente |
+| RF08 | Atendimentos | Alta | 9 | ✅ **CONCLUÍDO** |
+| RF09 | Tema | Baixa | 2 | ✅ **CONCLUÍDO** |
+| RF10 | Compartilhamento | Baixa | 3 | ✅ **CONCLUÍDO** |
 | RF11 | Relatórios | Média | 5 | ❌ Pendente |
-| RF10 | Compartilhamento | Baixa | 3 | ❌ Pendente |
-| RF09 | Tema | Baixa | 2 | ❌ Pendente |
 | RF01 | Onboarding | Baixa | 0 | ❌ Pendente |
 
-**Total estimado restante**: 6-10 dias de desenvolvimento
+**Total estimado restante**: 2-3 dias de desenvolvimento

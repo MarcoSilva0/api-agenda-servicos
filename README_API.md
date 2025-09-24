@@ -72,6 +72,31 @@ A API foi implementada com sucesso, seguindo os requisitos funcionais especifica
 | PATCH | `/appointments/:id` | Atualizar agendamento | RF06 |
 | DELETE | `/appointments/:id` | Excluir agendamento | RF06 |
 
+### 👤 **Usuários** (`/users`)
+| Método | Rota | Descrição | RF |
+|--------|------|-----------|----| 
+| GET | `/users/:id/theme` | Obter tema do usuário | RF09 |
+| PUT | `/users/:id/theme` | Alterar tema do usuário | RF09 |
+
+### 🏥 **Atendimentos** (`/attendances`)
+| Método | Rota | Descrição | RF |
+|--------|------|-----------|----| 
+| GET | `/attendances` | Listar atendimentos | RF08 |
+| GET | `/attendances/:id` | Buscar atendimento específico | RF08 |
+| POST | `/attendances` | Criar atendimento | RF08 |
+| PATCH | `/attendances/:id` | Atualizar atendimento | RF08 |
+| POST | `/attendances/:id/complete` | Finalizar atendimento | RF08 |
+| GET | `/attendances/:id/services` | Listar serviços | RF08 |
+| POST | `/attendances/:id/services` | Adicionar serviço | RF08 |
+| DELETE | `/attendances/:id/services/:serviceId` | Remover serviço | RF08 |
+| POST | `/attendances/:id/share` | Gerar texto compartilhamento | RF10 |
+
+### 🏢 **Empresa** (`/companies`)
+| Método | Rota | Descrição | RF |
+|--------|------|-----------|----| 
+| GET | `/companies/share-template` | Obter template compartilhamento | RF10 |
+| PUT | `/companies/share-template` | Atualizar template | RF10 |
+
 ## 🎯 Requisitos Funcionais Implementados
 
 ### ✅ **RF02 - Entrada no sistema**
@@ -111,6 +136,24 @@ A API foi implementada com sucesso, seguindo os requisitos funcionais especifica
 - Navegação por data específica
 - Identificação de agendamentos em atraso
 - Agrupamento por dias com estatísticas
+
+### ✅ **RF08 - Atendimentos**
+- Conversão de agendamentos em atendimentos
+- Edição de serviços durante atendimento
+- Adição e remoção de colaboradores
+- Finalização com atualização de status
+- Controle completo do fluxo de atendimento
+
+### ✅ **RF09 - Tema do aplicativo**
+- Seleção entre SYSTEM, LIGHT e DARK
+- Persistência da preferência por usuário
+- API para gerenciamento de temas
+
+### ✅ **RF10 - Compartilhamento**
+- Geração de texto personalizado para compartilhamento
+- Templates editáveis com variáveis dinâmicas
+- Formatação automática de dados do atendimento
+- Suporte a variáveis como {companyName}, {services}, etc.
 
 ### ✅ **RF12 - Recuperação de senha**
 - Solicitação de recuperação
@@ -173,11 +216,9 @@ Acesse `http://localhost:3000/api` para:
 
 Para completar todos os requisitos funcionais, implemente:
 
-- **RF08** - Atendimentos (conversão de agendamentos)
-- **RF09** - Tema do aplicativo  
-- **RF10** - Compartilhamento
+- **RF01** - Primeira utilização (principalmente frontend)
 - **RF11** - Relatório de clientes
 
 A base está sólida e escalável para implementar as funcionalidades restantes! 🚀
 
-**Status atual**: 7 de 11 requisitos funcionais implementados (64% concluído)
+**Status atual**: 10 de 11 requisitos funcionais implementados (91% concluído)

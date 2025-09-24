@@ -28,9 +28,14 @@
 - `GET /employees` - Listar colaboradores (RF05)
 - `GET /employees/:id` - Buscar colaborador específico
 - `POST /employees` - Criar novo colaborador (RF05)
-- `PUT /employees/:id` - Atualizar colaborador (RF05)
+- `PATCH /employees/:id` - Atualizar colaborador (RF05)
 - `DELETE /employees/:id` - Excluir colaborador (RF05)
+- `GET /employees/:id/service-preferences` - Buscar preferências de serviços (RF05)
 - `POST /employees/:id/service-preferences` - Definir preferências de serviços (RF05)
+
+## 👤 Usuários
+- `GET /users/:id/theme` - Obter tema do usuário (RF09)
+- `PUT /users/:id/theme` - Alterar tema do usuário (RF09)
 
 ## 👤 Clientes
 - `GET /clients` - Listar clientes (RF11)
@@ -54,17 +59,18 @@
 - `DELETE /appointments/:id` - Cancelar agendamento (RF06)
 
 ## 🏥 Atendimentos
-- `GET /attendances` - Listar atendimentos
-- `GET /attendances/:id` - Buscar atendimento específico
-- `POST /attendances` - Iniciar atendimento a partir de agendamento (RF08)
-- `PUT /attendances/:id` - Atualizar atendimento (RF08)
-- `PUT /attendances/:id/complete` - Finalizar atendimento (RF08)
-- `POST /attendances/:id/share` - Compartilhar dados do atendimento (RF10)
+- `GET /attendances` - Listar atendimentos (RF08)
+- `GET /attendances/:id` - Buscar atendimento específico (RF08)
+- `POST /attendances` - Criar atendimento a partir de agendamento (RF08)
+- `PATCH /attendances/:id` - Atualizar atendimento (RF08)
+- `POST /attendances/:id/complete` - Finalizar atendimento (RF08)
+- `GET /attendances/:id/services` - Listar serviços do atendimento (RF08)
+- `POST /attendances/:id/services` - Adicionar serviço ao atendimento (RF08)
+- `DELETE /attendances/:id/services/:serviceId` - Remover serviço do atendimento (RF08)
+- `POST /attendances/:id/share` - Gerar texto para compartilhamento (RF10)
 
 ## 🏢 Empresa/Usuário
-- `GET /companies/profile` - Perfil da empresa
-- `PUT /companies/profile` - Atualizar perfil da empresa
-- `PUT /companies/theme` - Alterar tema do aplicativo (RF09)
+- `GET /companies/share-template` - Obter template de compartilhamento (RF10)
 - `PUT /companies/share-template` - Personalizar template de compartilhamento (RF10)
 
 ## 📊 Relatórios
