@@ -1,6 +1,6 @@
 # 📋 Requisitos Funcionais - Status de Implementação
 
-## ✅ **Implementados (4/11)**
+## ✅ **Implementados (5/11)**
 
 ### **RF02 - Entrada no sistema**
 - ✅ Registro de usuário e empresa
@@ -20,30 +20,32 @@
 - ✅ Importação automática
 - ✅ Organização por prioridade
 
+### **RF05 - Colaboradores**
+- ✅ CRUD de colaboradores
+- ✅ Upload de fotos (campo photoUrl)
+- ✅ Preferências por serviço
+- ✅ Vinculação com serviços
+- ✅ Paginação e isolamento por empresa
+- ✅ Documentação Swagger completa
+
+**Endpoints implementados**:
+```
+✅ GET    /employees                    - Listar colaboradores
+✅ POST   /employees                    - Criar colaborador
+✅ PATCH  /employees/:id               - Atualizar colaborador
+✅ GET    /employees/:id               - Buscar colaborador
+✅ DELETE /employees/:id               - Excluir colaborador
+✅ POST   /employees/:id/service-preferences - Definir preferências
+✅ GET    /employees/:id/service-preferences - Buscar preferências
+```
+
 ### **RF12 - Recuperação de senha**
 - ✅ Solicitação via email
 - ✅ Reset com token
 - ✅ Hash seguro de senhas
 - ✅ Controle de expiração
 
-## ❌ **Faltam Implementar (8/11)**
-
-### **RF05 - Colaboradores**
-**Prioridade**: Alta
-- ❌ CRUD de colaboradores
-- ❌ Upload de fotos
-- ❌ Preferências por serviço
-- ❌ Vinculação com serviços
-
-**Endpoints necessários**:
-```
-GET    /employees
-POST   /employees
-PUT    /employees/:id
-DELETE /employees/:id
-POST   /employees/:id/service-preferences
-GET    /employees/:id/service-preferences
-```
+## ❌ **Faltam Implementar (7/11)**
 
 ### **RF06 - Agendamentos**
 **Prioridade**: Alta
@@ -138,7 +140,7 @@ DELETE /clients/:id
 ## 🎯 **Plano de Implementação Sugerido**
 
 ### **Fase 1 - Core Business (Prioridade Alta)**
-1. **RF05 - Colaboradores** → Base para agendamentos
+1. ✅ **RF05 - Colaboradores** → Base para agendamentos ✨ **CONCLUÍDO**
 2. **RF06 - Agendamentos** → Funcionalidade principal
 3. **RF07 - Calendário** → Visualização essencial
 4. **RF08 - Atendimentos** → Conversão do agendamento
@@ -153,15 +155,15 @@ DELETE /clients/:id
 
 ## 📊 **Estimativa de Complexidade**
 
-| RF | Funcionalidade | Complexidade | Endpoints | Tempo Est. |
-|----|---------------|--------------|-----------|------------|
-| RF05 | Colaboradores | Média | 6 | 2-3 dias |
-| RF06 | Agendamentos | Alta | 5 | 3-4 dias |
-| RF07 | Calendário | Média | 3 | 1-2 dias |
-| RF08 | Atendimentos | Alta | 7 | 4-5 dias |
-| RF11 | Relatórios | Média | 5 | 2-3 dias |
-| RF10 | Compartilhamento | Baixa | 3 | 1-2 dias |
-| RF09 | Tema | Baixa | 2 | 1 dia |
-| RF01 | Onboarding | Baixa | 0 | 1 dia (frontend) |
+| RF | Funcionalidade | Complexidade | Endpoints | Status |
+|----|---------------|--------------|-----------|---------|
+| RF05 | Colaboradores | Média | 7 | ✅ **CONCLUÍDO** |
+| RF06 | Agendamentos | Alta | 5 | ❌ Pendente |
+| RF07 | Calendário | Média | 3 | ❌ Pendente |
+| RF08 | Atendimentos | Alta | 7 | ❌ Pendente |
+| RF11 | Relatórios | Média | 5 | ❌ Pendente |
+| RF10 | Compartilhamento | Baixa | 3 | ❌ Pendente |
+| RF09 | Tema | Baixa | 2 | ❌ Pendente |
+| RF01 | Onboarding | Baixa | 0 | ❌ Pendente |
 
-**Total estimado**: 15-21 dias de desenvolvimento
+**Total estimado restante**: 12-18 dias de desenvolvimento

@@ -10,10 +10,11 @@ Este projeto foi desenvolvido como parte da avaliação da disciplina **Desenvol
 
 A API serve como backend para um aplicativo móvel que permite a pequenas empresas:
 - ✅ Gerenciar seus serviços e colaboradores
-- ✅ Controlar agendamentos e atendimentos
-- ✅ Acompanhar relatórios de clientes
-- ✅ Personalizar a experiência com temas
-- ✅ Compartilhar dados de atendimento
+- ✅ Definir preferências de serviços por funcionário
+- 🔄 Controlar agendamentos e atendimentos (em desenvolvimento)
+- 🔄 Acompanhar relatórios de clientes (em desenvolvimento)
+- 🔄 Personalizar a experiência com temas (planejado)
+- 🔄 Compartilhar dados de atendimento (planejado)
 
 ## 🏗️ Arquitetura e Tecnologias
 
@@ -47,17 +48,20 @@ A API serve como backend para um aplicativo móvel que permite a pequenas empres
 - Importação automática de serviços comuns
 
 ### ⚙️ **Gerenciamento de Serviços**
+### ⚙️ **Gerenciamento de Serviços**
 - Criação e edição de serviços personalizados
 - Sistema de favoritos para priorização
 - Importação de serviços de outros ramos
 - Organização automática por relevância
 
-## 🔄 Funcionalidades em Desenvolvimento
+### � **Gestão de Colaboradores** 
+- Cadastro completo de funcionários
+- Upload e gerenciamento de fotos
+- Definição de preferências por serviço
+- Isolamento seguro por empresa
+- Paginação otimizada para grandes volumes
 
-### 👥 **Colaboradores** (RF05)
-- Cadastro de funcionários
-- Gestão de preferências por serviço
-- Upload de fotos dos colaboradores
+## 🔄 Funcionalidades em Desenvolvimento
 
 ### 📅 **Sistema de Agendamentos** (RF06, RF07)
 - Agendamento com validação de conflitos
@@ -135,6 +139,29 @@ A API serve como backend para um aplicativo móvel que permite a pequenas empres
 }
 ```
 
+### 👤 **Employee (Colaborador)**
+```typescript
+{
+  id: string
+  companyId: string      // Empresa proprietária
+  name: string           // Nome completo do colaborador
+  photoUrl?: string      // URL da foto (opcional)
+  servicePreferences: EmployeeServicePreference[] // Serviços que pode executar
+  createdAt: Date
+  updatedAt: Date
+}
+```
+
+### 🔗 **EmployeeServicePreference (Preferência de Serviço)**
+```typescript
+{
+  id: string
+  employeeId: string     // Colaborador
+  serviceId: string      // Serviço vinculado
+  createdAt: Date
+}
+```
+
 ## 🔒 Segurança
 
 - **Autenticação JWT** obrigatória para rotas protegidas
@@ -172,6 +199,15 @@ Acesse `http://localhost:3000/api` para:
 - `POST /services` - Criar novo serviço
 - `POST /services/import` - Importar do ramo de atividade
 - `PUT /services/:id/toggle-favorite` - Alternar favorito
+
+#### Colaboradores
+- `GET /employees` - Listar colaboradores (com paginação)
+- `POST /employees` - Cadastrar novo colaborador
+- `GET /employees/:id` - Buscar colaborador específico
+- `PATCH /employees/:id` - Atualizar dados do colaborador
+- `DELETE /employees/:id` - Remover colaborador
+- `GET /employees/:id/service-preferences` - Buscar preferências de serviço
+- `POST /employees/:id/service-preferences` - Definir serviços que pode executar
 
 ## 🚀 Como Executar
 
@@ -218,12 +254,35 @@ npx prisma studio
 2. **Registre uma empresa**: Use `POST /auth/register`
 3. **Faça login**: Use `POST /auth/login`
 4. **Authorize**: Copie o token e clique em "Authorize"
-5. **Teste as rotas**: Experimente criar serviços, importar do ramo, etc.
+5. **Teste as rotas**: Experimente criar serviços, colaboradores, definir preferências, etc.
+
+### **🆕 Testando Colaboradores (RF05)**
+1. **Cadastre um colaborador**: `POST /employees`
+   ```json
+   {
+     "name": "João Silva",
+     "photoUrl": "https://exemplo.com/foto.jpg"
+   }
+   ```
+2. **Liste colaboradores**: `GET /employees?page=1&limit=10`
+3. **Defina preferências**: `POST /employees/:id/service-preferences`
+   ```json
+   {
+     "serviceIds": ["uuid-do-servico-1", "uuid-do-servico-2"]
+   }
+   ```
+4. **Consulte preferências**: `GET /employees/:id/service-preferences`
 
 ## 🎯 Roadmap
 
-### **Próximas Implementações**
-- [ ] **RF05** - Sistema de colaboradores
+### **✅ Implementações Concluídas**
+- [x] **RF02** - Sistema de autenticação completo
+- [x] **RF03** - Gestão de ramos de atividade
+- [x] **RF04** - Gerenciamento de serviços
+- [x] **RF05** - Sistema de colaboradores ✨ **NOVO**
+- [x] **RF12** - Recuperação de senha
+
+### **📋 Próximas Implementações**
 - [ ] **RF06** - Criação de agendamentos  
 - [ ] **RF07** - Calendário interativo
 - [ ] **RF08** - Gestão de atendimentos
