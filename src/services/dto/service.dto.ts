@@ -52,6 +52,14 @@ export class UpdateServiceDto {
   @IsBoolean()
   @IsOptional()
   isFavorite?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Se o serviço está ativo (disponível para agendamento)',
+    example: true,
+  })
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
 }
 
 export class ImportServicesDto {
@@ -166,6 +174,12 @@ export class ServiceResponseDto {
     example: false,
   })
   isFavorite: boolean;
+
+  @ApiProperty({
+    description: 'Se o serviço está ativo na empresa',
+    example: true,
+  })
+  isActive: boolean;
 
   @ApiProperty({
     description: 'Se o serviço veio do ramo de atividade',

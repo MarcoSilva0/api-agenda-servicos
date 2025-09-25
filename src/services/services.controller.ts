@@ -51,6 +51,7 @@ export class ServicesController {
     description: 'Lista todos os serviços da empresa do usuário logado (RF04)'
   })
   @ApiQuery({ name: 'favorites', required: false, type: Boolean, description: 'Filtrar apenas favoritos' })
+  @ApiQuery({ name: 'includeInactive', required: false, type: Boolean, description: 'Incluir serviços desativados' })
   @ApiResponse({
     status: 200,
     description: 'Lista de serviços',
@@ -60,8 +61,9 @@ export class ServicesController {
     @Request() req,
     @Query() paginationDto: PaginationDto,
     @Query('favorites') favorites?: boolean,
+    @Query('includeInactive') includeInactive?: boolean,
   ) {
-    return this.servicesService.findAll(req.user.companyId, paginationDto, favorites);
+    return this.servicesService.findAll(req.user.companyId, paginationDto, favorites, includeInactive);
   }
 
   @Get('favorites')
@@ -190,6 +192,20 @@ export class ServicesController {
   })
   async toggleFavorite(@Request() req, @Param('id') id: string) {
     return this.servicesService.toggleFavorite(id, req.user.companyId);
+  }
+
+  @Put(':id/toggle-active')
+  @ApiOperation({ 
+    summary: 'Ativar/desativar serviço da empresa',
+    description: 'Permite que a empresa desabilite serviços importados do sistema sem excluí-los'
+  })
+  @ApiParam({ name: 'id', description: 'ID do serviço' })
+  @ApiResponse({
+    status: 200,
+    description: 'Status de ativo alterado com sucesso',
+  })
+  async toggleActive(@Request() req, @Param('id') id: string) {
+    return this.servicesService.toggleActive(id, req.user.companyId);
   }
 
   @Delete(':id')

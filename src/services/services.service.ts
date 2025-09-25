@@ -17,6 +17,7 @@ export class ServicesService {
     companyId: string,
     paginationDto: PaginationDto,
     favorites?: boolean,
+    includeInactive?: boolean, // novo parâmetro para incluir inativos
   ) {
     const { page = 1, limit = 10 } = paginationDto;
     const skip = (page - 1) * limit;
@@ -24,6 +25,7 @@ export class ServicesService {
     const where = {
       companyId,
       ...(favorites && { isFavorite: true }),
+      ...(!includeInactive && { isActive: true }), // só mostra ativos por padrão
     };
 
     const [data, total] = await Promise.all([
@@ -251,6 +253,23 @@ export class ServicesService {
     return {
       message: `Serviço ${updatedService.isFavorite ? 'marcado' : 'desmarcado'} como favorito`,
       isFavorite: updatedService.isFavorite,
+    };
+  }
+
+  async toggleActive(id: string, companyId: string) {
+    const service = await this.findOne(id, companyId);
+
+    const updatedService = await this.prisma.service.update({
+      where: { id },
+      data: { isActive: !service.isActive },
+    });
+
+    return {
+      message: `Serviço ${updatedService.isActive ? 'ativado' : 'desativado'} para sua empresa`,
+      isActive: updatedService.isActive,
+      note: service.isSystemDefault 
+        ? 'Serviço do sistema foi ' + (updatedService.isActive ? 'reativado' : 'desabilitado') + ' apenas para sua empresa'
+        : 'Status do serviço alterado'
     };
   }
 

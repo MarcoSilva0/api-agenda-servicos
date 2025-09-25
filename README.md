@@ -259,6 +259,7 @@ Acesse `http://localhost:3000/api` para:
 - `POST /services/import/selective` - ✨ **NOVO** - Importar serviços selecionados
 - `POST /services/import/csv` - 🔥 **NOVO** - Importar serviços via CSV
 - `PUT /services/:id/toggle-favorite` - Alternar favorito
+- `PUT /services/:id/toggle-active` - 🔥 **NOVO** - Ativar/desativar serviço da empresa
 
 #### Colaboradores
 - `GET /employees` - Listar colaboradores (com paginação)
@@ -384,6 +385,49 @@ npx prisma studio
    ```
 
 4. **Arquivo de exemplo**: Veja `exemplo-servicos.csv` no projeto
+
+### **🔥 Gerenciamento de Serviços por Empresa (NOVO)**
+
+#### **Problema Resolvido:**
+> "E se eu não quiser usar uma atividade que é padrão do sistema?"
+
+#### **Solução: Controle Individual por Empresa**
+
+1. **Desativar serviço importado**: `PUT /services/:id/toggle-active`
+   ```json
+   // Resposta:
+   {
+     "message": "Serviço desativado para sua empresa",
+     "isActive": false,
+     "note": "Serviço do sistema foi desabilitado apenas para sua empresa"
+   }
+   ```
+
+2. **Listar todos os serviços (incluindo inativos)**: `GET /services?includeInactive=true`
+   - Por padrão: só mostra serviços ativos
+   - Com parâmetro: mostra ativos + inativos para gerenciamento
+
+3. **Status dos serviços**:
+   ```json
+   {
+     "id": "uuid-123",
+     "name": "Barba",
+     "isActive": false,        // ❌ Desativado nesta empresa
+     "isSystemDefault": true,  // ✅ Veio do sistema
+     "isFromActivityBranch": true
+   }
+   ```
+
+#### **Cenário Prático:**
+- **Empresa A**: Desativa "Barba" → Clientes não veem este serviço
+- **Empresa B**: Mantém "Barba" ativo → Clientes podem agendar
+- **Sistema**: Serviço "Barba" continua disponível no catálogo geral
+
+#### **Benefícios:**
+- ✅ **Controle Total**: Cada empresa decide quais serviços oferece
+- ✅ **Flexibilidade**: Pode reativar serviços a qualquer momento  
+- ✅ **Sem Perda**: Serviços desativados ficam ocultos, não são excluídos
+- ✅ **Histórico**: Mantém dados de agendamentos antigos do serviço
 
 ### **🆕 Testando Colaboradores (RF05)**
 1. **Cadastre um colaborador**: `POST /employees`

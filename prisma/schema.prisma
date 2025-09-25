@@ -81,6 +81,7 @@ model Service {
   name                 String
   description          String
   isFavorite           Boolean  @default(false)
+  isActive             Boolean  @default(true) // permite desabilitar serviços sem excluir
   isFromActivityBranch Boolean  @default(false)
   isSystemDefault      Boolean  @default(false) // flag para separar serviços padrão do sistema
   activityBranchId     String? // rastrear origem
