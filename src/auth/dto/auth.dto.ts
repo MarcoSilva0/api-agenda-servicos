@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEmail, IsString, IsNotEmpty, MinLength, IsOptional, IsEnum } from 'class-validator';
-import { UserRole } from '../../../generated/prisma';
+import { UserRole } from '@prisma/client';
 
 export class RegisterDto {
   @ApiProperty({
@@ -53,12 +53,12 @@ export class RegisterDto {
   address: string;
 
   @ApiPropertyOptional({
-    description: 'URL do logo da empresa',
-    example: 'https://exemplo.com/logo.png',
+    description: 'Logo da empresa. Pode ser enviado como base64 (data:image/...) via JSON ou como arquivo via multipart/form-data no campo "logo"',
+    example: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB...',
   })
   @IsString()
   @IsOptional()
-  logoUrl?: string;
+  logo?: string;
 
   @ApiProperty({
     description: 'ID do ramo de atividade',
@@ -151,6 +151,7 @@ export class AuthResponseDto {
     company: {
       id: number;
       name: string;
+      logoUrl?: string | null;
       themePreference: string;
     };
   };

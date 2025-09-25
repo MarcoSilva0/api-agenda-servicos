@@ -4,7 +4,7 @@ import { join } from 'path';
 
 @Injectable()
 export class EmailTemplateService {
-  private readonly templatesPath = join(__dirname, '..', 'templates', 'email');
+  private readonly templatesPath = join(process.cwd(), 'src', 'templates', 'email');
 
   /**
    * Renderiza um template de email substituindo as variáveis

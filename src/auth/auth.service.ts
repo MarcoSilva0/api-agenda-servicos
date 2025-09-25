@@ -9,9 +9,10 @@ import {
   ResetPasswordDto, 
   AuthResponseDto 
 } from './dto/auth.dto';
-import { ThemePreference } from '../../generated/prisma';
+import { ThemePreference } from '@prisma/client';
 import { MailerService } from 'src/mailer/mailer.service';
 import { EmailTemplateService } from 'src/core/email-template.service';
+import { FileUploadService } from 'src/core/file-upload.service';
 
 @Injectable()
 export class AuthService {
@@ -20,9 +21,10 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly mailerService: MailerService,
     private readonly emailTemplateService: EmailTemplateService,
+    private readonly fileUploadService: FileUploadService,
   ) {}
 
-  async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
+  async register(registerDto: RegisterDto, logoFile?: any): Promise<AuthResponseDto> {
     // Verificar se o email já existe
     const existingUser = await this.prisma.user.findUnique({
       where: { email: registerDto.email },
@@ -37,17 +39,48 @@ export class AuthService {
 
     // Criar empresa e usuário em uma transação
     const result = await this.prisma.$transaction(async (tx) => {
-      // Criar empresa
+      // Criar empresa primeiro
       const company = await tx.company.create({
         data: {
           name: registerDto.companyName,
           email: registerDto.email,
           phone: registerDto.phone,
           address: registerDto.address,
-          logoUrl: registerDto.logoUrl,
+          logoUrl: null, // Será atualizado após salvar a logo
           activityBranchId: registerDto.activityBranchId.toString(),
         },
       });
+
+      // Salvar logo se fornecida (arquivo ou base64)
+      let logoUrl: string | null = null;
+      
+      try {
+        if (logoFile && logoFile.buffer) {
+          // Logo enviada como arquivo (multipart/form-data)
+          logoUrl = await this.fileUploadService.saveCompanyLogoFromBuffer(
+            company.id,
+            logoFile.buffer,
+            logoFile.mimetype
+          );
+        } else if (registerDto.logo && registerDto.logo.startsWith('data:')) {
+          // Logo enviada como base64 (JSON)
+          logoUrl = await this.fileUploadService.saveCompanyLogo(
+            company.id,
+            registerDto.logo
+          );
+        }
+        
+        // Atualizar empresa com a URL da logo se foi salva
+        if (logoUrl) {
+          await tx.company.update({
+            where: { id: company.id },
+            data: { logoUrl },
+          });
+        }
+      } catch (error) {
+        console.warn('Erro ao salvar logo da empresa:', error.message);
+        // Continuar o registro mesmo se a logo falhar
+      }
 
       // Criar usuário
       const user = await tx.user.create({
@@ -65,7 +98,7 @@ export class AuthService {
         },
       });
 
-      return { user, company };
+      return { user, company: { ...company, logoUrl } };
     });
 
     // Gerar JWT
@@ -78,10 +111,14 @@ export class AuthService {
     };
     const access_token = this.jwtService.sign(payload);
 
+    // Enviar email de boas-vindas
     try {
       const welcomeEmailContent = this.emailTemplateService.renderTemplate('welcome', {
         userName: result.user.name,
         companyName: result.company.name,
+        companyEmail: result.company.email,
+        companyPhone: result.company.phone,
+        companyAddress: result.company.address,
         loginUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
       });
 
@@ -106,6 +143,7 @@ export class AuthService {
         company: {
           id: parseInt(result.company.id) || 0,
           name: result.company.name,
+          logoUrl: result.company.logoUrl,
           themePreference: 'SYSTEM',
         },
       },
@@ -152,6 +190,7 @@ export class AuthService {
         company: {
           id: parseInt(user.company.id) || 0,
           name: user.company.name,
+          logoUrl: user.company.logoUrl,
           themePreference: 'SYSTEM',
         },
       },

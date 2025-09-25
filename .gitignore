@@ -55,4 +55,9 @@ pids
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
+# Generated prisma client
 /generated/prisma
+
+# Uploads (user content)
+/uploads/companies/*/
+!/uploads/companies/.gitkeep
