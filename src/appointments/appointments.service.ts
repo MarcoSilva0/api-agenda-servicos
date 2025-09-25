@@ -7,10 +7,14 @@ import { AppointmentResponseDto } from './dto/appointment-response.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { CalendarQueryDto } from './dto/calendar.dto';
 import { CalendarResponseDto, CalendarDayDto } from './dto/calendar-response.dto';
+import { NotificationService } from '../services/notification.service';
 
 @Injectable()
 export class AppointmentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService,
+  ) {}
 
   async create(createAppointmentDto: CreateAppointmentDto, companyId: string): Promise<AppointmentResponseDto> {
     const { clientName, clientPhone, appointmentDateStart, appointmentDateEnd, serviceId, employeeId } = createAppointmentDto;
@@ -94,8 +98,36 @@ export class AppointmentsService {
         client: true,
         service: true,
         employee: true,
+        company: true,
       },
     });
+
+    // Enviar email de confirmação
+    try {
+      // Por enquanto, usaremos um email padrão ou pularemos se não tiver email
+      // Em uma implementação futura, pode ser adicionado campo email no Client
+      const clientEmail = `${client.phone}@example.com`; // Placeholder por enquanto
+      
+      await this.notificationService.sendAppointmentConfirmation({
+        clientName: appointment.client.name,
+        clientEmail: clientEmail,
+        companyName: appointment.company.name,
+        companyEmail: appointment.company.email || '',
+        companyPhone: appointment.company.phone || '',
+        companyAddress: appointment.company.address || '',
+        appointmentDate: appointment.appointmentDateStart.toLocaleDateString('pt-BR'),
+        appointmentTime: appointment.appointmentDateStart.toLocaleTimeString('pt-BR', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        serviceName: appointment.service.name,
+        servicePrice: 'A definir', // Campo price não existe no modelo Service
+        employeeName: appointment.employee?.name || 'Não especificado',
+      });
+    } catch (error) {
+      console.error('Erro ao enviar email de confirmação:', error);
+      // Não bloquear o agendamento se o email falhar
+    }
 
     return this.formatAppointmentResponse(appointment);
   }
@@ -534,5 +566,70 @@ export class AppointmentsService {
     });
 
     return appointments.map(appointment => this.formatAppointmentResponse(appointment));
+  }
+
+  /**
+   * Enviar lembretes para agendamentos do dia seguinte
+   */
+  async sendAppointmentReminders(companyId: string): Promise<{ sent: number; errors: number }> {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+
+    const dayAfterTomorrow = new Date(tomorrow);
+    dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 1);
+
+    const appointments = await this.prisma.appointment.findMany({
+      where: {
+        companyId,
+        status: AppointmentStatus.SCHEDULED,
+        appointmentDateStart: {
+          gte: tomorrow,
+          lt: dayAfterTomorrow,
+        },
+      },
+      include: {
+        client: true,
+        service: true,
+        employee: true,
+        company: true,
+      },
+    });
+
+    let sent = 0;
+    let errors = 0;
+
+    for (const appointment of appointments) {
+      try {
+        const clientEmail = `${appointment.client.phone}@example.com`; // Placeholder
+        
+        await this.notificationService.sendAppointmentReminder({
+          clientName: appointment.client.name,
+          clientEmail: clientEmail,
+          companyName: appointment.company.name,
+          companyEmail: appointment.company.email || '',
+          companyPhone: appointment.company.phone || '',
+          companyAddress: appointment.company.address || '',
+          appointmentDate: appointment.appointmentDateStart.toLocaleDateString('pt-BR'),
+          appointmentTime: appointment.appointmentDateStart.toLocaleTimeString('pt-BR', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          }),
+          serviceName: appointment.service.name,
+          servicePrice: 'A definir',
+          serviceDuration: '1 hora', // Placeholder
+          employeeName: appointment.employee?.name || 'Não especificado',
+          confirmUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/confirm-appointment/${appointment.id}`,
+          rescheduleUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reschedule-appointment/${appointment.id}`,
+        });
+        
+        sent++;
+      } catch (error) {
+        console.error(`Erro ao enviar lembrete para agendamento ${appointment.id}:`, error);
+        errors++;
+      }
+    }
+
+    return { sent, errors };
   }
 }

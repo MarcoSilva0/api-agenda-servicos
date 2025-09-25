@@ -12,6 +12,10 @@ import { AppointmentsModule } from './appointments/appointments.module';
 import { AttendancesModule } from './attendances/attendances.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { MailerModule } from './mailer/mailer.module';
+import { CoreModule } from './core/core.module';
+import { NotificationModule } from './services/notification.module';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
@@ -26,6 +30,10 @@ import { AuthModule } from './auth/auth.module';
     AppointmentsModule,
     AttendancesModule,
     AuthModule,
+    MailerModule,
+    CoreModule,
+    NotificationModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

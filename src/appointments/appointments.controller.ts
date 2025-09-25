@@ -445,4 +445,44 @@ export class AppointmentsController {
   async getOverdueAppointments(@Request() req: any): Promise<AppointmentResponseDto[]> {
     return this.appointmentsService.getOverdueAppointments(req.user.companyId);
   }
+
+  @Post('send-reminders')
+  @ApiOperation({
+    summary: 'Enviar lembretes de agendamento',
+    description: 'Envia lembretes por email para agendamentos do dia seguinte',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Lembretes enviados com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Lembretes processados',
+        },
+        sent: {
+          type: 'number',
+          example: 5,
+          description: 'Quantidade de lembretes enviados com sucesso',
+        },
+        errors: {
+          type: 'number',
+          example: 0,
+          description: 'Quantidade de erros ao enviar lembretes',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Token de autenticação inválido ou ausente',
+  })
+  async sendReminders(@Request() req: any) {
+    const result = await this.appointmentsService.sendAppointmentReminders(req.user.companyId);
+    return {
+      message: 'Lembretes processados',
+      ...result
+    };
+  }
 }

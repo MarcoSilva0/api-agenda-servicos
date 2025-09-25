@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmação de Agendamento</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f6f9fc;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .appointment-card {
+            background-color: #f8fff8;
+            border: 1px solid #d4edda;
+            border-left: 4px solid #00b894;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 6px;
+        }
+        .appointment-details {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .appointment-details:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .detail-value {
+            color: #00b894;
+            font-weight: 500;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #6c757d;
+            border-top: 1px solid #e9ecef;
+        }
+        .contact-info {
+            background-color: #f8f9ff;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Agendamento Confirmado!</h1>
+        </div>
+        
+        <div class="content">
+            <p>Olá <strong>{{clientName}}</strong>,</p>
+            
+            <p>Seu agendamento com <strong>{{companyName}}</strong> foi confirmado com sucesso!</p>
+            
+            <div class="appointment-card">
+                <h3 style="margin-top: 0; color: #00b894;">📋 Detalhes do Agendamento</h3>
+                
+                <div class="appointment-details">
+                    <span class="detail-label">🗓️ Data:</span>
+                    <span class="detail-value">{{appointmentDate}}</span>
+                </div>
+                
+                <div class="appointment-details">
+                    <span class="detail-label">⏰ Horário:</span>
+                    <span class="detail-value">{{appointmentTime}}</span>
+                </div>
+                
+                <div class="appointment-details">
+                    <span class="detail-label">💼 Serviço:</span>
+                    <span class="detail-value">{{serviceName}}</span>
+                </div>
+                
+                <div class="appointment-details">
+                    <span class="detail-label">👤 Profissional:</span>
+                    <span class="detail-value">{{employeeName}}</span>
+                </div>
+                
+                <div class="appointment-details">
+                    <span class="detail-label">💰 Valor:</span>
+                    <span class="detail-value">{{servicePrice}}</span>
+                </div>
+            </div>
+            
+            <div class="contact-info">
+                <p><strong>📞 Precisa reagendar ou cancelar?</strong></p>
+                <p>Entre em contato conosco:</p>
+                <p>📧 {{companyEmail}} | 📱 {{companyPhone}}</p>
+            </div>
+            
+            <p style="margin-top: 30px;">Estamos ansiosos para atendê-lo! 😊</p>
+        </div>
+        
+        <div class="footer">
+            <p>{{companyName}} - {{companyAddress}}</p>
+            <p>Este é um email automático, não responda esta mensagem.</p>
+        </div>
+    </div>
+</body>
+</html>

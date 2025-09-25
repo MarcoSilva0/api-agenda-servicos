@@ -10,12 +10,16 @@ import {
   AuthResponseDto 
 } from './dto/auth.dto';
 import { ThemePreference } from '../../generated/prisma';
+import { MailerService } from 'src/mailer/mailer.service';
+import { EmailTemplateService } from 'src/core/email-template.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly mailerService: MailerService,
+    private readonly emailTemplateService: EmailTemplateService,
   ) {}
 
   async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
@@ -74,6 +78,23 @@ export class AuthService {
     };
     const access_token = this.jwtService.sign(payload);
 
+    try {
+      const welcomeEmailContent = this.emailTemplateService.renderTemplate('welcome', {
+        userName: result.user.name,
+        companyName: result.company.name,
+        loginUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+      });
+
+      await this.mailerService.sendEmail(
+        result.user.email,
+        `🎉 Bem-vindo à ${result.company.name}!`,
+        welcomeEmailContent,
+      );
+    } catch (error) {
+      console.error('Erro ao enviar email de boas-vindas:', error);
+      // Não bloquear o registro se o email falhar
+    }
+    
     return {
       access_token,
       user: {
@@ -158,12 +179,36 @@ export class AuthService {
       },
     });
 
-    // TODO: Implementar envio de email
-    // Por enquanto, retornamos o token para desenvolvimento
+    // Buscar dados da empresa para o email
+    const userWithCompany = await this.prisma.user.findUnique({
+      where: { id: user.id },
+      include: { company: true },
+    });
+
+    // Enviar email de redefinição de senha
+    try {
+      const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+      
+      const passwordResetEmailContent = this.emailTemplateService.renderTemplate('password-reset', {
+        userName: user.name,
+        companyName: userWithCompany?.company?.name || 'Sistema',
+        resetUrl: resetUrl,
+      });
+
+      await this.mailerService.sendEmail(
+        user.email,
+        `🔐 Redefinir senha - ${userWithCompany?.company?.name || 'Sistema'}`,
+        passwordResetEmailContent,
+      );
+    } catch (error) {
+      console.error('Erro ao enviar email de redefinição de senha:', error);
+      // Não bloquear o processo se o email falhar
+    }
+
     return {
       message: 'Email de recuperação enviado',
-      // Em produção, remover esta linha:
-      token: resetToken,
+      // Em desenvolvimento, manter o token para facilitar testes:
+      ...(process.env.NODE_ENV === 'development' && { token: resetToken }),
     };
   }
 
