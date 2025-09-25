@@ -60,9 +60,11 @@ A API serve como backend para um aplicativo móvel que permite a pequenas empres
 
 ### 🔐 **Sistema de Autenticação**
 - Registro de usuário com criação automática de empresa
+- 🔥 **NOVO** - Importação automática de serviços do ramo na criação
 - Login seguro com JWT
 - Recuperação de senha via email
 - Hash seguro de senhas com bcryptjs
+- Upload de logo da empresa durante registro
 
 ### 🏢 **Gestão de Ramos de Atividade** 
 - CRUD completo de ramos de atividade
@@ -428,6 +430,50 @@ npx prisma studio
 - ✅ **Flexibilidade**: Pode reativar serviços a qualquer momento  
 - ✅ **Sem Perda**: Serviços desativados ficam ocultos, não são excluídos
 - ✅ **Histórico**: Mantém dados de agendamentos antigos do serviço
+
+### **🔥 Registro Inteligente de Empresa (NOVO)**
+
+#### **Funcionalidade Automática:**
+Quando uma empresa se registra no sistema, ela **automaticamente recebe todos os serviços padrão** do seu ramo de atividade.
+
+#### **Como Funciona:**
+1. **Usuário se registra**: `POST /auth/register`
+   ```json
+   {
+     "companyName": "Barbearia do João",
+     "activityBranchId": "uuid-barbearia",
+     "email": "joao@barbearia.com",
+     // ... outros dados
+   }
+   ```
+
+2. **Sistema executa automaticamente**:
+   - ✅ Cria empresa
+   - ✅ Cria usuário dono
+   - 🔥 **NOVO**: Importa TODOS os serviços do ramo automaticamente
+   - ✅ Salva logo (se enviado)
+   - ✅ Envia email de boas-vindas
+
+3. **Resultado**: Empresa já tem serviços prontos para usar
+   ```json
+   // Exemplo: Barbearia recebe automaticamente:
+   [
+     { "name": "Corte de cabelo", "isSystemDefault": true, "isActive": true },
+     { "name": "Barba", "isSystemDefault": true, "isActive": true },
+     { "name": "Sobrancelha", "isSystemDefault": true, "isActive": true }
+   ]
+   ```
+
+#### **Benefícios:**
+- ✅ **Experiência Fluida**: Empresa já sai do registro com serviços
+- ✅ **Produtividade**: Não precisa criar serviços manualmente
+- ✅ **Padronização**: Usa nomenclatura consistente do mercado
+- ✅ **Flexibilidade**: Pode desativar serviços não desejados depois
+
+#### **Controle Pós-Registro:**
+- **Desativar serviços**: `PUT /services/:id/toggle-active`
+- **Adicionar mais**: `POST /services/import/csv` ou criação manual
+- **Gerenciar**: Todas as funcionalidades de serviços disponíveis
 
 ### **🆕 Testando Colaboradores (RF05)**
 1. **Cadastre um colaborador**: `POST /employees`

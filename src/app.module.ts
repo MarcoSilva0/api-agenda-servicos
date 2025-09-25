@@ -16,6 +16,7 @@ import { MailerModule } from './mailer/mailer.module';
 import { CoreModule } from './core/core.module';
 import { NotificationModule } from './services/notification.module';
 import { TasksModule } from './tasks/tasks.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { TasksModule } from './tasks/tasks.module';
     CoreModule,
     NotificationModule,
     TasksModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -43,7 +43,7 @@ export class UsersController {
     description: 'Token inválido ou não fornecido',
   })
   async getProfile(@Request() req) {
-    return this.usersService.getProfile(req.user.sub);
+    return this.usersService.getProfile(req.user.id);
   }
 
   @Get(':id/theme')
@@ -78,7 +78,7 @@ export class UsersController {
     @Param('id') id: string,
     @Request() req: any,
   ): Promise<ThemeResponseDto> {
-    return this.usersService.getTheme(id, req.user.userId);
+    return this.usersService.getTheme(id, req.user.id);
   }
 
   @Put(':id/theme')
@@ -118,6 +118,6 @@ export class UsersController {
     @Body() updateThemeDto: UpdateThemeDto,
     @Request() req: any,
   ): Promise<ThemeResponseDto> {
-    return this.usersService.updateTheme(id, updateThemeDto, req.user.userId);
+    return this.usersService.updateTheme(id, updateThemeDto, req.user.id);
   }
 }

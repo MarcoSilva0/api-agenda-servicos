@@ -96,6 +96,33 @@ export class AuthService {
         },
       });
 
+      try {
+        const defaultServices = await tx.defaultActivityService.findMany({
+          where: { activityBranchId: registerDto.activityBranchId.toString() },
+        });
+
+        if (defaultServices.length > 0) {
+          await tx.service.createMany({
+            data: defaultServices.map((defaultService) => ({
+              companyId: company.id,
+              name: defaultService.name,
+              description: defaultService.description,
+              isFavorite: defaultService.isFavoriteDefault,
+              isActive: true,
+              isFromActivityBranch: true,
+              isSystemDefault: true, // Serviços importados do sistema
+              activityBranchId: registerDto.activityBranchId.toString(),
+            })),
+          });
+          
+          console.log(`Empresa '${company.name}' registrada com ${defaultServices.length} serviços padrão importados automaticamente`);
+        } else {
+          console.log(`Nenhum serviço padrão encontrado para o ramo de atividade: ${registerDto.activityBranchId}`);
+        }
+      } catch (error) {
+        console.warn('Erro ao importar serviços padrão:', error.message);
+      }
+
       return { user, company: { ...company, logoUrl } };
     });
 
