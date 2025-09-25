@@ -10,7 +10,7 @@
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: #f6f9fc;
-            color: #333;
+            color: #000000;
         }
         .container {
             max-width: 600px;
@@ -21,7 +21,7 @@
             overflow: hidden;
         }
         .header {
-            background: linear-gradient(135deg, #fdcb6e 0%, #f39c12 100%);
+            background: #2f9e41;
             padding: 40px 20px;
             text-align: center;
         }
@@ -35,15 +35,15 @@
             padding: 40px 30px;
         }
         .reminder-card {
-            background-color: #fffbf0;
-            border: 1px solid #ffe8a1;
-            border-left: 4px solid #fdcb6e;
+            background-color: #f8fff8;
+            border: 1px solid #d4edda;
+            border-left: 4px solid #2f9e41;
             padding: 25px;
             margin: 25px 0;
             border-radius: 6px;
         }
         .time-highlight {
-            background: linear-gradient(135deg, #fdcb6e 0%, #f39c12 100%);
+            background: #2f9e41;
             color: white;
             padding: 15px;
             border-radius: 6px;
@@ -64,10 +64,10 @@
         }
         .detail-label {
             font-weight: 600;
-            color: #495057;
+            color: #000000;
         }
         .detail-value {
-            color: #f39c12;
+            color: #2f9e41;
             font-weight: 500;
         }
         .footer {
@@ -92,11 +92,11 @@
             font-size: 14px;
         }
         .btn-primary {
-            background-color: #00b894;
+            background-color: #2f9e41;
             color: white;
         }
         .btn-secondary {
-            background-color: #74b9ff;
+            background-color: #2f9e41;
             color: white;
         }
     </style>
@@ -104,7 +104,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>⏰ Lembrete de Agendamento</h1>
+            <h1>Lembrete de Agendamento</h1>
         </div>
         
         <div class="content">
@@ -113,40 +113,40 @@
             <p>Este é um lembrete amigável sobre seu agendamento com <strong>{{companyName}}</strong>.</p>
             
             <div class="time-highlight">
-                🗓️ {{appointmentDate}} às {{appointmentTime}}
+                {{appointmentDate}} às {{appointmentTime}}
             </div>
             
             <div class="reminder-card">
-                <h3 style="margin-top: 0; color: #f39c12;">📋 Detalhes do Seu Agendamento</h3>
+                <h3 style="margin-top: 0; color: #2f9e41;">Detalhes do Seu Agendamento</h3>
                 
                 <div class="appointment-details">
-                    <span class="detail-label">💼 Serviço:</span>
+                    <span class="detail-label">Serviço:</span>
                     <span class="detail-value">{{serviceName}}</span>
                 </div>
                 
                 <div class="appointment-details">
-                    <span class="detail-label">👤 Profissional:</span>
+                    <span class="detail-label">Profissional:</span>
                     <span class="detail-value">{{employeeName}}</span>
                 </div>
                 
                 <div class="appointment-details">
-                    <span class="detail-label">⏱️ Duração:</span>
+                    <span class="detail-label">Duração:</span>
                     <span class="detail-value">{{serviceDuration}}</span>
                 </div>
                 
                 <div class="appointment-details">
-                    <span class="detail-label">💰 Valor:</span>
+                    <span class="detail-label">Valor:</span>
                     <span class="detail-value">{{servicePrice}}</span>
                 </div>
                 
                 <div class="appointment-details">
-                    <span class="detail-label">📍 Local:</span>
+                    <span class="detail-label">Local:</span>
                     <span class="detail-value">{{companyAddress}}</span>
                 </div>
             </div>
             
             <div style="background-color: #f8f9ff; padding: 20px; border-radius: 6px; margin: 20px 0;">
-                <p><strong>💡 Dicas para seu agendamento:</strong></p>
+                <p><strong>Dicas para seu agendamento:</strong></p>
                 <ul style="margin: 10px 0; padding-left: 20px;">
                     <li>Chegue 5 minutos antes do horário</li>
                     <li>Traga um documento com foto</li>
@@ -155,12 +155,12 @@
             </div>
             
             <div class="action-buttons">
-                <a href="{{confirmUrl}}" class="btn btn-primary">✅ Confirmar Presença</a>
-                <a href="{{rescheduleUrl}}" class="btn btn-secondary">📅 Reagendar</a>
+                <a href="{{confirmUrl}}" class="btn btn-primary">Confirmar Presença</a>
+                <a href="{{rescheduleUrl}}" class="btn btn-secondary">Reagendar</a>
             </div>
             
             <p style="text-align: center; margin-top: 25px;">
-                <strong>📞 Contato:</strong> {{companyPhone}} | <strong>📧 Email:</strong> {{companyEmail}}
+                <strong>Contato:</strong> {{companyPhone}} | <strong>Email:</strong> {{companyEmail}}
             </p>
         </div>
         

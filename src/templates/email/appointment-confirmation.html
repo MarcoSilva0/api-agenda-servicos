@@ -10,7 +10,7 @@
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: #f6f9fc;
-            color: #333;
+            color: #000000;
         }
         .container {
             max-width: 600px;
@@ -21,7 +21,7 @@
             overflow: hidden;
         }
         .header {
-            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            background: #2f9e41;
             padding: 40px 20px;
             text-align: center;
         }
@@ -37,7 +37,7 @@
         .appointment-card {
             background-color: #f8fff8;
             border: 1px solid #d4edda;
-            border-left: 4px solid #00b894;
+            border-left: 4px solid #2f9e41;
             padding: 25px;
             margin: 25px 0;
             border-radius: 6px;
@@ -54,10 +54,10 @@
         }
         .detail-label {
             font-weight: 600;
-            color: #495057;
+            color: #000000;
         }
         .detail-value {
-            color: #00b894;
+            color: #2f9e41;
             font-weight: 500;
         }
         .footer {
@@ -79,7 +79,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>✅ Agendamento Confirmado!</h1>
+            <h1>Agendamento Confirmado!</h1>
         </div>
         
         <div class="content">
@@ -88,41 +88,41 @@
             <p>Seu agendamento com <strong>{{companyName}}</strong> foi confirmado com sucesso!</p>
             
             <div class="appointment-card">
-                <h3 style="margin-top: 0; color: #00b894;">📋 Detalhes do Agendamento</h3>
+                <h3 style="margin-top: 0; color: #2f9e41;">Detalhes do Agendamento</h3>
                 
                 <div class="appointment-details">
-                    <span class="detail-label">🗓️ Data:</span>
+                    <span class="detail-label">Data:</span>
                     <span class="detail-value">{{appointmentDate}}</span>
                 </div>
                 
                 <div class="appointment-details">
-                    <span class="detail-label">⏰ Horário:</span>
+                    <span class="detail-label">Horário:</span>
                     <span class="detail-value">{{appointmentTime}}</span>
                 </div>
                 
                 <div class="appointment-details">
-                    <span class="detail-label">💼 Serviço:</span>
+                    <span class="detail-label">Serviço:</span>
                     <span class="detail-value">{{serviceName}}</span>
                 </div>
                 
                 <div class="appointment-details">
-                    <span class="detail-label">👤 Profissional:</span>
+                    <span class="detail-label">Profissional:</span>
                     <span class="detail-value">{{employeeName}}</span>
                 </div>
                 
                 <div class="appointment-details">
-                    <span class="detail-label">💰 Valor:</span>
+                    <span class="detail-label">Valor:</span>
                     <span class="detail-value">{{servicePrice}}</span>
                 </div>
             </div>
             
             <div class="contact-info">
-                <p><strong>📞 Precisa reagendar ou cancelar?</strong></p>
+                <p><strong>Precisa reagendar ou cancelar?</strong></p>
                 <p>Entre em contato conosco:</p>
-                <p>📧 {{companyEmail}} | 📱 {{companyPhone}}</p>
+                <p>Email: {{companyEmail}} | Telefone: {{companyPhone}}</p>
             </div>
             
-            <p style="margin-top: 30px;">Estamos ansiosos para atendê-lo! 😊</p>
+            <p style="margin-top: 30px;">Estamos ansiosos para atendê-lo!</p>
         </div>
         
         <div class="footer">
