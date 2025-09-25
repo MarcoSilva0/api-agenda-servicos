@@ -40,7 +40,6 @@ export class ServicesController {
     summary: 'Listar serviços da empresa',
     description: 'Lista todos os serviços da empresa do usuário logado (RF04)'
   })
-  @ApiQuery({ type: PaginationDto })
   @ApiQuery({ name: 'favorites', required: false, type: Boolean, description: 'Filtrar apenas favoritos' })
   @ApiResponse({
     status: 200,

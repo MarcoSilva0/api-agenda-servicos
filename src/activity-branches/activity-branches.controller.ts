@@ -43,7 +43,6 @@ export class ActivityBranchesController {
     summary: 'Listar ramos de atividade',
     description: 'Lista todos os ramos de atividade disponíveis (RF03) - Endpoint público',
   })
-  @ApiQuery({ type: PaginationDto })
   @ApiResponse({
     status: 200,
     description: 'Lista de ramos de atividade',
