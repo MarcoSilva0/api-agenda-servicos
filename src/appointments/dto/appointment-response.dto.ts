@@ -42,7 +42,7 @@ export class AppointmentResponseDto {
   service: {
     id: string;
     name: string;
-    description: string;
+    description?: string;
     isFavorite: boolean;
   };
 

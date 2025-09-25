@@ -14,7 +14,7 @@ export class AttendanceServiceResponseDto {
   service: {
     id: string;
     name: string;
-    description: string;
+    description?: string;
     isFavorite: boolean;
   };
 

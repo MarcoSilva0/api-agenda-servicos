@@ -79,7 +79,7 @@ model Service {
   id                   String   @id @default(uuid())
   companyId            String
   name                 String
-  description          String
+  description          String?
   isFavorite           Boolean  @default(false)
   isActive             Boolean  @default(true) // permite desabilitar serviços sem excluir
   isFromActivityBranch Boolean  @default(false)

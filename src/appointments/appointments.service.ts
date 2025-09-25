@@ -485,7 +485,7 @@ export class AppointmentsService {
       service: {
         id: appointment.service.id,
         name: appointment.service.name,
-        description: appointment.service.description,
+        description: appointment.service.description || undefined,
         isFavorite: appointment.service.isFavorite,
       },
       employee: appointment.employee

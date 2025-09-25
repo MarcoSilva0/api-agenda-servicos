@@ -10,13 +10,13 @@ export class CreateServiceDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Descrição do serviço',
     example: 'Corte de cabelo masculino e feminino',
   })
   @IsString()
-  @IsNotEmpty()
-  description: string;
+  @IsOptional()
+  description?: string;
 
   @ApiPropertyOptional({
     description: 'Se o serviço é favorito',
@@ -131,11 +131,11 @@ export class DefaultServiceResponseDto {
   })
   name: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Descrição do serviço',
     example: 'Corte de cabelo masculino e feminino',
   })
-  description: string;
+  description?: string;
 
   @ApiProperty({
     description: 'Se é favorito por padrão',
@@ -163,11 +163,11 @@ export class ServiceResponseDto {
   })
   name: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Descrição do serviço',
     example: 'Corte de cabelo masculino e feminino',
   })
-  description: string;
+  description?: string;
 
   @ApiProperty({
     description: 'Se o serviço é favorito',

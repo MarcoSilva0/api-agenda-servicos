@@ -52,6 +52,6 @@ export class EmployeeResponseDto {
   preferredServices?: Array<{
     id: string;
     name: string;
-    description: string;
+    description?: string;
   }>;
 }

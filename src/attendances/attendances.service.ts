@@ -339,7 +339,7 @@ export class AttendancesService {
         service: {
           id: as.service.id,
           name: as.service.name,
-          description: as.service.description,
+          description: as.service.description || undefined,
           isFavorite: as.service.isFavorite,
         },
         employee: employee
@@ -440,7 +440,7 @@ export class AttendancesService {
       service: {
         id: attendanceService.service.id,
         name: attendanceService.service.name,
-        description: attendanceService.service.description,
+        description: attendanceService.service.description || undefined,
         isFavorite: attendanceService.service.isFavorite,
       },
       employee: employee
@@ -531,7 +531,7 @@ export class AttendancesService {
         service: {
           id: as.service.id,
           name: as.service.name,
-          description: as.service.description,
+          description: as.service.description || undefined,
           isFavorite: as.service.isFavorite,
         },
         employee: employeesByService.get(as.serviceId),

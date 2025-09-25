@@ -239,7 +239,7 @@ export class EmployeesService {
       servicePreferences: services.map((service) => ({
         id: service.id,
         name: service.name,
-        description: service.description,
+        description: service.description || undefined,
       })),
     };
   }
