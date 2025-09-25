@@ -8,15 +8,22 @@ import {
   Body, 
   Query,
   UseGuards,
-  Request 
+  Request,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { 
   ApiTags, 
   ApiOperation, 
   ApiResponse, 
   ApiParam, 
   ApiBearerAuth,
-  ApiQuery
+  ApiQuery,
+  ApiConsumes
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ServicesService } from './services.service';
@@ -24,7 +31,10 @@ import {
   CreateServiceDto, 
   UpdateServiceDto, 
   ImportServicesDto,
-  ServiceResponseDto 
+  SelectiveImportServicesDto,
+  ServiceResponseDto,
+  DefaultServiceResponseDto,
+  CsvImportResultDto 
 } from './dto/service.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 
@@ -103,8 +113,8 @@ export class ServicesController {
 
   @Post('import')
   @ApiOperation({ 
-    summary: 'Importar serviços do ramo de atividade',
-    description: 'Importa serviços comuns de um ramo de atividade (RF03)'
+    summary: 'Importar todos os serviços do ramo de atividade',
+    description: 'Importa todos os serviços comuns de um ramo de atividade (RF03)'
   })
   @ApiResponse({
     status: 201,
@@ -112,6 +122,41 @@ export class ServicesController {
   })
   async importServices(@Request() req, @Body() importServicesDto: ImportServicesDto) {
     return this.servicesService.importServices(req.user.companyId, importServicesDto.activityBranchId);
+  }
+
+  @Get('available/:activityBranchId')
+  @ApiOperation({ 
+    summary: 'Listar serviços disponíveis do ramo de atividade',
+    description: 'Lista todos os serviços disponíveis de um ramo de atividade, indicando quais já foram importados'
+  })
+  @ApiParam({ name: 'activityBranchId', description: 'ID do ramo de atividade' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de serviços disponíveis',
+    type: [DefaultServiceResponseDto],
+  })
+  async getAvailableServices(
+    @Request() req,
+    @Param('activityBranchId') activityBranchId: string
+  ) {
+    return this.servicesService.getAvailableServices(req.user.companyId, activityBranchId);
+  }
+
+  @Post('import/selective')
+  @ApiOperation({ 
+    summary: 'Importar serviços selecionados do ramo de atividade',
+    description: 'Importa apenas os serviços específicos escolhidos de um ramo de atividade (RF03)'
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Serviços selecionados importados com sucesso',
+  })
+  async importSelectedServices(@Request() req, @Body() selectiveImportDto: SelectiveImportServicesDto) {
+    return this.servicesService.importSelectedServices(
+      req.user.companyId, 
+      selectiveImportDto.activityBranchId,
+      selectiveImportDto.defaultServiceIds
+    );
   }
 
   @Put(':id')
@@ -159,5 +204,31 @@ export class ServicesController {
   })
   async remove(@Request() req, @Param('id') id: string) {
     return this.servicesService.remove(id, req.user.companyId);
+  }
+
+  @Post('import/csv')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ 
+    summary: 'Importar serviços via CSV',
+    description: 'Importa serviços através de upload de arquivo CSV com colunas: nome, descrição'
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Resultado da importação do CSV',
+    type: CsvImportResultDto,
+  })
+  async importCsv(
+    @Request() req,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 2 }), // 2MB
+          new FileTypeValidator({ fileType: 'text/csv' }),
+        ],
+      }),
+    ) file: Express.Multer.File,
+  ) {
+    return this.servicesService.importFromCsv(req.user.companyId, file);
   }
 }

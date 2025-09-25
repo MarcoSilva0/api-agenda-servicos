@@ -70,11 +70,16 @@ A API serve como backend para um aplicativo móvel que permite a pequenas empres
 - Importação automática de serviços comuns
 
 ### ⚙️ **Gerenciamento de Serviços**
-### ⚙️ **Gerenciamento de Serviços**
 - Criação e edição de serviços personalizados
 - Sistema de favoritos para priorização
-- Importação de serviços de outros ramos
+- ✨ **NOVO** - Visualização de serviços disponíveis por ramo de atividade
+- ✨ **NOVO** - Importação seletiva de serviços específicos
+- 🔥 **NOVO** - Importação em lote via arquivo CSV
+- 🔥 **NOVO** - Classificação de serviços (sistema vs empresa)
+- Importação completa de todos os serviços de um ramo
 - Organização automática por relevância
+- Controle de duplicatas na importação
+- Validação avançada de dados
 
 ### � **Gestão de Colaboradores** 
 - Cadastro completo de funcionários
@@ -157,7 +162,9 @@ A API serve como backend para um aplicativo móvel que permite a pequenas empres
   name: string           // Ex: "Corte de cabelo"
   description: string    // Descrição detalhada
   isFavorite: boolean    // Serviço favorito
-  isFromActivityBranch: boolean // Importado ou criado
+  isFromActivityBranch: boolean // Importado do ramo ou criado
+  isSystemDefault: boolean // 🔥 NOVO - Se é padrão do sistema ou criado por empresa
+  activityBranchId?: string // ID do ramo de origem (opcional)
 }
 ```
 
@@ -247,7 +254,10 @@ Acesse `http://localhost:3000/api` para:
 - `GET /services` - Listar serviços da empresa
 - `GET /services/favorites` - Apenas favoritos
 - `POST /services` - Criar novo serviço
-- `POST /services/import` - Importar do ramo de atividade
+- `GET /services/available/:activityBranchId` - ✨ **NOVO** - Serviços disponíveis do ramo
+- `POST /services/import` - Importar todos os serviços do ramo
+- `POST /services/import/selective` - ✨ **NOVO** - Importar serviços selecionados
+- `POST /services/import/csv` - 🔥 **NOVO** - Importar serviços via CSV
 - `PUT /services/:id/toggle-favorite` - Alternar favorito
 
 #### Colaboradores
@@ -315,6 +325,65 @@ npx prisma studio
 3. **Faça login**: Use `POST /auth/login`
 4. **Authorize**: Copie o token e clique em "Authorize"
 5. **Teste as rotas**: Experimente criar serviços, colaboradores, definir preferências, etc.
+
+### **✨ Testando Importação Seletiva de Serviços (NOVO)**
+1. **Ver serviços disponíveis de um ramo**: `GET /services/available/:activityBranchId`
+   - Retorna todos os serviços do ramo com indicação de quais já foram importados
+   ```json
+   {
+     "id": "uuid-do-servico-padrao",
+     "name": "Corte de cabelo",
+     "description": "Corte masculino e feminino",
+     "isFavoriteDefault": true,
+     "alreadyImported": false
+   }
+   ```
+
+2. **Importar serviços específicos**: `POST /services/import/selective`
+   ```json
+   {
+     "activityBranchId": "uuid-do-ramo",
+     "defaultServiceIds": [
+       "uuid-servico-1",
+       "uuid-servico-3",
+       "uuid-servico-5"
+     ]
+   }
+   ```
+
+3. **Importar todos os serviços**: `POST /services/import`
+   ```json
+   {
+     "activityBranchId": "uuid-do-ramo"
+   }
+   ```
+
+### **🔥 Testando Importação via CSV (NOVO)**
+1. **Criar arquivo CSV** com as colunas `nome` e `descricao`:
+   ```csv
+   nome,descricao
+   Corte de cabelo,Corte masculino e feminino tradicional
+   Barba,Aparar e modelar barba com navalha
+   Sobrancelha,Design e limpeza de sobrancelhas
+   ```
+
+2. **Fazer upload do arquivo**: `POST /services/import/csv`
+   - Usar `multipart/form-data`
+   - Campo `file` com o arquivo CSV
+   - Máximo 2MB
+   - Tipo: `text/csv`
+
+3. **Resposta da importação**:
+   ```json
+   {
+     "imported": 3,
+     "failed": 0,
+     "errors": [],
+     "message": "3 serviços importados com sucesso"
+   }
+   ```
+
+4. **Arquivo de exemplo**: Veja `exemplo-servicos.csv` no projeto
 
 ### **🆕 Testando Colaboradores (RF05)**
 1. **Cadastre um colaborador**: `POST /employees`

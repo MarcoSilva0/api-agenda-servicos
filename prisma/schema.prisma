@@ -82,6 +82,7 @@ model Service {
   description          String
   isFavorite           Boolean  @default(false)
   isFromActivityBranch Boolean  @default(false)
+  isSystemDefault      Boolean  @default(false) // flag para separar serviços padrão do sistema
   activityBranchId     String? // rastrear origem
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
