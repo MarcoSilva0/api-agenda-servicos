@@ -20,7 +20,6 @@ export class AppointmentReminderService {
     this.logger.log('Iniciando envio de lembretes diários...');
 
     try {
-      // Buscar todas as empresas ativas
       const companies = await this.prisma.company.findMany({
         select: { id: true, name: true },
       });
@@ -30,27 +29,30 @@ export class AppointmentReminderService {
 
       for (const company of companies) {
         try {
-          this.logger.log(`Processando lembretes para empresa: ${company.name}`);
-          
-          const result = await this.appointmentsService.sendAppointmentReminders(company.id);
-          
+          this.logger.log(
+            `Processando lembretes para empresa: ${company.name}`,
+          );
+
+          const result =
+            await this.appointmentsService.sendAppointmentReminders(company.id);
+
           totalSent += result.sent;
           totalErrors += result.errors;
 
           this.logger.log(
-            `Empresa ${company.name}: ${result.sent} lembretes enviados, ${result.errors} erros`
+            `Empresa ${company.name}: ${result.sent} lembretes enviados, ${result.errors} erros`,
           );
         } catch (error) {
           this.logger.error(
             `Erro ao processar lembretes para empresa ${company.name}:`,
-            error
+            error,
           );
           totalErrors++;
         }
       }
 
       this.logger.log(
-        `Lembretes diários concluídos. Total: ${totalSent} enviados, ${totalErrors} erros`
+        `Lembretes diários concluídos. Total: ${totalSent} enviados, ${totalErrors} erros`,
       );
     } catch (error) {
       this.logger.error('Erro crítico ao processar lembretes diários:', error);
@@ -60,7 +62,7 @@ export class AppointmentReminderService {
   /**
    * Executa a cada hora durante o horário comercial para lembretes urgentes
    */
-  @Cron('0 8-18 * * 1-6') // A cada hora das 8h às 18h, segunda a sábado
+  @Cron('0 8-18 * * 1-6')
   async handleHourlyReminders() {
     this.logger.log('Verificando lembretes urgentes...');
 
@@ -68,7 +70,6 @@ export class AppointmentReminderService {
       const now = new Date();
       const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
 
-      // Buscar agendamentos que começam na próxima hora
       const appointments = await this.prisma.appointment.findMany({
         where: {
           appointmentDateStart: {
@@ -90,19 +91,15 @@ export class AppointmentReminderService {
 
       for (const appointment of appointments) {
         try {
-          // Verificar se já foi enviado um lembrete urgente (você pode adicionar um campo na tabela)
-          // Por simplicidade, vamos enviar sempre
-          
-          this.logger.log(`Enviando lembrete urgente para agendamento ${appointment.id}`);
-          
-          // Aqui você poderia usar o mesmo método ou criar um específico para lembretes urgentes
-          // await this.appointmentsService.sendUrgentReminder(appointment);
-          
+          this.logger.log(
+            `Enviando lembrete urgente para agendamento ${appointment.id}`,
+          );
+
           sent++;
         } catch (error) {
           this.logger.error(
             `Erro ao enviar lembrete urgente para agendamento ${appointment.id}:`,
-            error
+            error,
           );
           errors++;
         }
@@ -110,7 +107,7 @@ export class AppointmentReminderService {
 
       if (appointments.length > 0) {
         this.logger.log(
-          `Lembretes urgentes: ${sent} enviados, ${errors} erros de ${appointments.length} agendamentos`
+          `Lembretes urgentes: ${sent} enviados, ${errors} erros de ${appointments.length} agendamentos`,
         );
       }
     } catch (error) {

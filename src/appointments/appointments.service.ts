@@ -1,12 +1,23 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
-import { UpdateAppointmentDto, AppointmentStatus } from './dto/update-appointment.dto';
+import {
+  UpdateAppointmentDto,
+  AppointmentStatus,
+} from './dto/update-appointment.dto';
 import { CheckAvailabilityDto } from './dto/check-availability.dto';
 import { AppointmentResponseDto } from './dto/appointment-response.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { CalendarQueryDto } from './dto/calendar.dto';
-import { CalendarResponseDto, CalendarDayDto } from './dto/calendar-response.dto';
+import {
+  CalendarResponseDto,
+  CalendarDayDto,
+} from './dto/calendar-response.dto';
 import { NotificationService } from '../services/notification.service';
 
 @Injectable()
@@ -16,48 +27,58 @@ export class AppointmentsService {
     private readonly notificationService: NotificationService,
   ) {}
 
-  async create(createAppointmentDto: CreateAppointmentDto, companyId: string): Promise<AppointmentResponseDto> {
-    const { clientName, clientPhone, appointmentDateStart, appointmentDateEnd, serviceId, employeeId } = createAppointmentDto;
+  async create(
+    createAppointmentDto: CreateAppointmentDto,
+    companyId: string,
+  ): Promise<AppointmentResponseDto> {
+    const {
+      clientName,
+      clientPhone,
+      appointmentDateStart,
+      appointmentDateEnd,
+      serviceId,
+      employeeId,
+    } = createAppointmentDto;
 
-    // Verificar se o serviço pertence à empresa
     const service = await this.prisma.service.findFirst({
-      where: { 
+      where: {
         id: serviceId,
         companyId,
       },
     });
 
     if (!service) {
-      throw new NotFoundException('Serviço não encontrado ou não pertence à sua empresa');
+      throw new NotFoundException(
+        'Serviço não encontrado ou não pertence à sua empresa',
+      );
     }
 
-    // Verificar se o funcionário pertence à empresa (se especificado)
     if (employeeId) {
       const employee = await this.prisma.employee.findFirst({
-        where: { 
+        where: {
           id: employeeId,
           companyId,
         },
       });
 
       if (!employee) {
-        throw new NotFoundException('Funcionário não encontrado ou não pertence à sua empresa');
+        throw new NotFoundException(
+          'Funcionário não encontrado ou não pertence à sua empresa',
+        );
       }
     }
 
-    // Converter strings para Date
     const dateStart = new Date(appointmentDateStart);
     const dateEnd = new Date(appointmentDateEnd);
-    
-    // Validar se a data de término é posterior à data de início
+
     if (dateEnd <= dateStart) {
-      throw new BadRequestException('A data/horário de término deve ser posterior ao início');
+      throw new BadRequestException(
+        'A data/horário de término deve ser posterior ao início',
+      );
     }
-    
-    // Verificar conflitos de horário
+
     await this.checkTimeConflict(dateStart, dateEnd, companyId, employeeId);
 
-    // Buscar ou criar cliente
     let client = await this.prisma.client.findFirst({
       where: {
         phone: clientPhone,
@@ -74,7 +95,6 @@ export class AppointmentsService {
         },
       });
     } else {
-      // Atualizar nome se diferente
       if (client.name !== clientName) {
         client = await this.prisma.client.update({
           where: { id: client.id },
@@ -83,7 +103,6 @@ export class AppointmentsService {
       }
     }
 
-    // Criar agendamento
     const appointment = await this.prisma.appointment.create({
       data: {
         companyId,
@@ -102,12 +121,9 @@ export class AppointmentsService {
       },
     });
 
-    // Enviar email de confirmação
     try {
-      // Por enquanto, usaremos um email padrão ou pularemos se não tiver email
-      // Em uma implementação futura, pode ser adicionado campo email no Client
-      const clientEmail = `${client.phone}@example.com`; // Placeholder por enquanto
-      
+      const clientEmail = `${client.phone}@example.com`;
+
       await this.notificationService.sendAppointmentConfirmation({
         clientName: appointment.client.name,
         clientEmail: clientEmail,
@@ -115,18 +131,21 @@ export class AppointmentsService {
         companyEmail: appointment.company.email || '',
         companyPhone: appointment.company.phone || '',
         companyAddress: appointment.company.address || '',
-        appointmentDate: appointment.appointmentDateStart.toLocaleDateString('pt-BR'),
-        appointmentTime: appointment.appointmentDateStart.toLocaleTimeString('pt-BR', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }),
+        appointmentDate:
+          appointment.appointmentDateStart.toLocaleDateString('pt-BR'),
+        appointmentTime: appointment.appointmentDateStart.toLocaleTimeString(
+          'pt-BR',
+          {
+            hour: '2-digit',
+            minute: '2-digit',
+          },
+        ),
         serviceName: appointment.service.name,
-        servicePrice: 'A definir', // Campo price não existe no modelo Service
+        servicePrice: 'A definir',
         employeeName: appointment.employee?.name || 'Não especificado',
       });
     } catch (error) {
       console.error('Erro ao enviar email de confirmação:', error);
-      // Não bloquear o agendamento se o email falhar
     }
 
     return this.formatAppointmentResponse(appointment);
@@ -141,9 +160,7 @@ export class AppointmentsService {
         where: { companyId },
         skip,
         take: limit,
-        orderBy: [
-          { appointmentDateStart: 'asc' },
-        ],
+        orderBy: [{ appointmentDateStart: 'asc' }],
         include: {
           client: true,
           service: true,
@@ -153,7 +170,9 @@ export class AppointmentsService {
       this.prisma.appointment.count({ where: { companyId } }),
     ]);
 
-    const appointments = data.map(appointment => this.formatAppointmentResponse(appointment));
+    const appointments = data.map((appointment) =>
+      this.formatAppointmentResponse(appointment),
+    );
 
     return {
       data: appointments,
@@ -166,7 +185,10 @@ export class AppointmentsService {
     };
   }
 
-  async findOne(id: string, companyId: string): Promise<AppointmentResponseDto> {
+  async findOne(
+    id: string,
+    companyId: string,
+  ): Promise<AppointmentResponseDto> {
     const appointment = await this.prisma.appointment.findUnique({
       where: { id },
       include: {
@@ -187,77 +209,98 @@ export class AppointmentsService {
     return this.formatAppointmentResponse(appointment);
   }
 
-  async update(id: string, updateAppointmentDto: UpdateAppointmentDto, companyId: string): Promise<AppointmentResponseDto> {
+  async update(
+    id: string,
+    updateAppointmentDto: UpdateAppointmentDto,
+    companyId: string,
+  ): Promise<AppointmentResponseDto> {
     const appointment = await this.findOne(id, companyId);
-    
-    // Não permitir atualizar agendamentos já completados ou cancelados
+
     if (appointment.status !== AppointmentStatus.SCHEDULED) {
-      throw new BadRequestException('Não é possível atualizar agendamentos finalizados ou cancelados');
+      throw new BadRequestException(
+        'Não é possível atualizar agendamentos finalizados ou cancelados',
+      );
     }
 
-    const { appointmentDateStart, appointmentDateEnd, serviceId, employeeId, ...otherUpdates } = updateAppointmentDto;
+    const {
+      appointmentDateStart,
+      appointmentDateEnd,
+      serviceId,
+      employeeId,
+      ...otherUpdates
+    } = updateAppointmentDto;
 
-    // Verificar serviço se fornecido
     if (serviceId && serviceId !== appointment.service.id) {
       const service = await this.prisma.service.findFirst({
-        where: { 
+        where: {
           id: serviceId,
           companyId,
         },
       });
 
       if (!service) {
-        throw new NotFoundException('Serviço não encontrado ou não pertence à sua empresa');
+        throw new NotFoundException(
+          'Serviço não encontrado ou não pertence à sua empresa',
+        );
       }
     }
 
-    // Verificar funcionário se fornecido
     if (employeeId && employeeId !== appointment.employee?.id) {
       const employee = await this.prisma.employee.findFirst({
-        where: { 
+        where: {
           id: employeeId,
           companyId,
         },
       });
 
       if (!employee) {
-        throw new NotFoundException('Funcionário não encontrado ou não pertence à sua empresa');
+        throw new NotFoundException(
+          'Funcionário não encontrado ou não pertence à sua empresa',
+        );
       }
     }
 
-    // Verificar conflitos se data/hora foram alteradas
     if (appointmentDateStart || appointmentDateEnd) {
-      const newDateStart = appointmentDateStart ? new Date(appointmentDateStart) : appointment.appointmentDateStart;
-      const newDateEnd = appointmentDateEnd ? new Date(appointmentDateEnd) : appointment.appointmentDateEnd;
-      
-      // Validar se a data de término é posterior à data de início
+      const newDateStart = appointmentDateStart
+        ? new Date(appointmentDateStart)
+        : appointment.appointmentDateStart;
+      const newDateEnd = appointmentDateEnd
+        ? new Date(appointmentDateEnd)
+        : appointment.appointmentDateEnd;
+
       if (newDateEnd <= newDateStart) {
-        throw new BadRequestException('A data/horário de término deve ser posterior ao início');
+        throw new BadRequestException(
+          'A data/horário de término deve ser posterior ao início',
+        );
       }
-      
-      await this.checkTimeConflict(newDateStart, newDateEnd, companyId, employeeId || appointment.employee?.id, id);
+
+      await this.checkTimeConflict(
+        newDateStart,
+        newDateEnd,
+        companyId,
+        employeeId || appointment.employee?.id,
+        id,
+      );
     }
 
-    // Preparar dados para atualização
     const updateData: any = { ...otherUpdates };
-    
+
     if (appointmentDateStart) {
       updateData.appointmentDateStart = new Date(appointmentDateStart);
     }
-    
+
     if (appointmentDateEnd) {
       updateData.appointmentDateEnd = new Date(appointmentDateEnd);
     }
-    
+
     if (serviceId) {
       updateData.serviceId = serviceId;
     }
-    
+
     if (employeeId !== undefined) {
       updateData.employeeId = employeeId;
     }
 
-    // Atualizar agendamento
     const updatedAppointment = await this.prisma.appointment.update({
       where: { id },
       data: updateData,
@@ -283,38 +326,40 @@ export class AppointmentsService {
     };
   }
 
-  async checkAvailability(checkAvailabilityDto: CheckAvailabilityDto, companyId: string, employeeId?: string) {
+  async checkAvailability(
+    checkAvailabilityDto: CheckAvailabilityDto,
+    companyId: string,
+    employeeId?: string,
+  ) {
     const { dateStart, dateEnd } = checkAvailabilityDto;
     const startDateTime = new Date(dateStart);
     const endDateTime = new Date(dateEnd);
 
-    // Verificar se há sobreposição de horários
     const conflictWhere: any = {
       companyId,
       status: AppointmentStatus.SCHEDULED,
       OR: [
-        // Novo agendamento inicia durante um agendamento existente
         {
           AND: [
             { appointmentDateStart: { lte: startDateTime } },
-            { appointmentDateEnd: { gt: startDateTime } }
-          ]
+            { appointmentDateEnd: { gt: startDateTime } },
+          ],
         },
-        // Novo agendamento termina durante um agendamento existente
+
         {
           AND: [
             { appointmentDateStart: { lt: endDateTime } },
-            { appointmentDateEnd: { gte: endDateTime } }
-          ]
+            { appointmentDateEnd: { gte: endDateTime } },
+          ],
         },
-        // Novo agendamento engloba um agendamento existente
+
         {
           AND: [
             { appointmentDateStart: { gte: startDateTime } },
-            { appointmentDateEnd: { lte: endDateTime } }
-          ]
-        }
-      ]
+            { appointmentDateEnd: { lte: endDateTime } },
+          ],
+        },
+      ],
     };
 
     if (employeeId) {
@@ -327,22 +372,20 @@ export class AppointmentsService {
 
     return {
       available: !existingAppointment,
-      message: existingAppointment ? 'Horário possui conflito com outro agendamento' : 'Horário disponível',
+      message: existingAppointment
+        ? 'Horário possui conflito com outro agendamento'
+        : 'Horário disponível',
     };
   }
 
   async getServicesSortedByFavorites(companyId: string) {
     return this.prisma.service.findMany({
       where: { companyId },
-      orderBy: [
-        { isFavorite: 'desc' },
-        { name: 'asc' },
-      ],
+      orderBy: [{ isFavorite: 'desc' }, { name: 'asc' }],
     });
   }
 
   async getEmployeesByServicePreference(serviceId: string, companyId: string) {
-    // Buscar funcionários que têm preferência pelo serviço
     const employeesWithPreference = await this.prisma.employee.findMany({
       where: {
         companyId,
@@ -355,7 +398,6 @@ export class AppointmentsService {
       orderBy: { name: 'asc' },
     });
 
-    // Buscar demais funcionários
     const otherEmployees = await this.prisma.employee.findMany({
       where: {
         companyId,
@@ -371,34 +413,38 @@ export class AppointmentsService {
     return [...employeesWithPreference, ...otherEmployees];
   }
 
-  private async checkTimeConflict(dateStart: Date, dateEnd: Date, companyId: string, employeeId?: string, excludeAppointmentId?: string) {
-    // Verificar se há sobreposição de horários
+  private async checkTimeConflict(
+    dateStart: Date,
+    dateEnd: Date,
+    companyId: string,
+    employeeId?: string,
+    excludeAppointmentId?: string,
+  ) {
     const conflictWhere: any = {
       companyId,
       status: AppointmentStatus.SCHEDULED,
       OR: [
-        // Novo agendamento inicia durante um agendamento existente
         {
           AND: [
             { appointmentDateStart: { lte: dateStart } },
-            { appointmentDateEnd: { gt: dateStart } }
-          ]
+            { appointmentDateEnd: { gt: dateStart } },
+          ],
         },
-        // Novo agendamento termina durante um agendamento existente
+
         {
           AND: [
             { appointmentDateStart: { lt: dateEnd } },
-            { appointmentDateEnd: { gte: dateEnd } }
-          ]
+            { appointmentDateEnd: { gte: dateEnd } },
+          ],
         },
-        // Novo agendamento engloba um agendamento existente
+
         {
           AND: [
             { appointmentDateStart: { gte: dateStart } },
-            { appointmentDateEnd: { lte: dateEnd } }
-          ]
-        }
-      ]
+            { appointmentDateEnd: { lte: dateEnd } },
+          ],
+        },
+      ],
     };
 
     if (employeeId) {
@@ -419,10 +465,10 @@ export class AppointmentsService {
     });
 
     if (existingAppointment) {
-      const conflictMessage = employeeId 
+      const conflictMessage = employeeId
         ? `Funcionário ${existingAppointment.employee?.name} já tem agendamento que conflita com este horário`
         : `Já existe agendamento que conflita com este horário`;
-      
+
       throw new BadRequestException(conflictMessage);
     }
   }
@@ -442,11 +488,13 @@ export class AppointmentsService {
         description: appointment.service.description,
         isFavorite: appointment.service.isFavorite,
       },
-      employee: appointment.employee ? {
-        id: appointment.employee.id,
-        name: appointment.employee.name,
-        photoUrl: appointment.employee.photoUrl,
-      } : undefined,
+      employee: appointment.employee
+        ? {
+            id: appointment.employee.id,
+            name: appointment.employee.name,
+            photoUrl: appointment.employee.photoUrl,
+          }
+        : undefined,
       appointmentDateStart: appointment.appointmentDateStart,
       appointmentDateEnd: appointment.appointmentDateEnd,
       status: appointment.status,
@@ -455,15 +503,24 @@ export class AppointmentsService {
     };
   }
 
-  // Métodos para Calendário (RF07)
-  async getCalendar(companyId: string, calendarQuery: CalendarQueryDto): Promise<CalendarResponseDto> {
+  async getCalendar(
+    companyId: string,
+    calendarQuery: CalendarQueryDto,
+  ): Promise<CalendarResponseDto> {
     const { startDate, endDate } = calendarQuery;
-    
-    // Se não informado, usar período padrão de 30 dias a partir de hoje
+
     const now = new Date();
-    const defaultStart = new Date(now.getFullYear(), now.getMonth(), 1); // Primeiro dia do mês
-    const defaultEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999); // Último dia do mês
-    
+    const defaultStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const defaultEnd = new Date(
+      now.getFullYear(),
+      now.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
+
     const periodStart = startDate ? new Date(startDate) : defaultStart;
     const periodEnd = endDate ? new Date(endDate) : defaultEnd;
 
@@ -475,9 +532,7 @@ export class AppointmentsService {
           lte: periodEnd,
         },
       },
-      orderBy: [
-        { appointmentDateStart: 'asc' },
-      ],
+      orderBy: [{ appointmentDateStart: 'asc' }],
       include: {
         client: true,
         service: true,
@@ -485,10 +540,9 @@ export class AppointmentsService {
       },
     });
 
-    // Agrupar por data
     const dayGroups = new Map<string, any[]>();
-    
-    appointments.forEach(appointment => {
+
+    appointments.forEach((appointment) => {
       const date = appointment.appointmentDateStart.toISOString().split('T')[0];
       if (!dayGroups.has(date)) {
         dayGroups.set(date, []);
@@ -496,20 +550,25 @@ export class AppointmentsService {
       dayGroups.get(date)!.push(appointment);
     });
 
-    // Criar resposta do calendário
-    const days: CalendarDayDto[] = Array.from(dayGroups.entries()).map(([date, dayAppointments]) => {
-      const now = new Date();
-      const overdueCount = dayAppointments.filter(appointment => 
-        appointment.appointmentDateStart < now && appointment.status === 'scheduled'
-      ).length;
+    const days: CalendarDayDto[] = Array.from(dayGroups.entries()).map(
+      ([date, dayAppointments]) => {
+        const now = new Date();
+        const overdueCount = dayAppointments.filter(
+          (appointment) =>
+            appointment.appointmentDateStart < now &&
+            appointment.status === 'scheduled',
+        ).length;
 
-      return {
-        date,
-        totalAppointments: dayAppointments.length,
-        appointments: dayAppointments.map(appointment => this.formatAppointmentResponse(appointment)),
-        overdueCount,
-      };
-    });
+        return {
+          date,
+          totalAppointments: dayAppointments.length,
+          appointments: dayAppointments.map((appointment) =>
+            this.formatAppointmentResponse(appointment),
+          ),
+          overdueCount,
+        };
+      },
+    );
 
     return {
       days: days.sort((a, b) => a.date.localeCompare(b.date)),
@@ -518,8 +577,10 @@ export class AppointmentsService {
     };
   }
 
-  async getAppointmentsByDate(companyId: string, date: string): Promise<AppointmentResponseDto[]> {
-    // Criar início e fim do dia
+  async getAppointmentsByDate(
+    companyId: string,
+    date: string,
+  ): Promise<AppointmentResponseDto[]> {
     const startDate = new Date(`${date}T00:00:00.000Z`);
     const endDate = new Date(`${date}T23:59:59.999Z`);
 
@@ -531,9 +592,7 @@ export class AppointmentsService {
           lt: endDate,
         },
       },
-      orderBy: [
-        { appointmentDateStart: 'asc' },
-      ],
+      orderBy: [{ appointmentDateStart: 'asc' }],
       include: {
         client: true,
         service: true,
@@ -541,10 +600,14 @@ export class AppointmentsService {
       },
     });
 
-    return appointments.map(appointment => this.formatAppointmentResponse(appointment));
+    return appointments.map((appointment) =>
+      this.formatAppointmentResponse(appointment),
+    );
   }
 
-  async getOverdueAppointments(companyId: string): Promise<AppointmentResponseDto[]> {
+  async getOverdueAppointments(
+    companyId: string,
+  ): Promise<AppointmentResponseDto[]> {
     const now = new Date();
 
     const appointments = await this.prisma.appointment.findMany({
@@ -553,11 +616,9 @@ export class AppointmentsService {
         appointmentDateStart: {
           lt: now,
         },
-        status: 'scheduled', // Apenas agendamentos que ainda não foram atendidos
+        status: 'scheduled',
       },
-      orderBy: [
-        { appointmentDateStart: 'desc' }, // Mais recentes primeiro
-      ],
+      orderBy: [{ appointmentDateStart: 'desc' }],
       include: {
         client: true,
         service: true,
@@ -565,13 +626,17 @@ export class AppointmentsService {
       },
     });
 
-    return appointments.map(appointment => this.formatAppointmentResponse(appointment));
+    return appointments.map((appointment) =>
+      this.formatAppointmentResponse(appointment),
+    );
   }
 
   /**
    * Enviar lembretes para agendamentos do dia seguinte
    */
-  async sendAppointmentReminders(companyId: string): Promise<{ sent: number; errors: number }> {
+  async sendAppointmentReminders(
+    companyId: string,
+  ): Promise<{ sent: number; errors: number }> {
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     tomorrow.setHours(0, 0, 0, 0);
@@ -601,8 +666,8 @@ export class AppointmentsService {
 
     for (const appointment of appointments) {
       try {
-        const clientEmail = `${appointment.client.phone}@example.com`; // Placeholder
-        
+        const clientEmail = `${appointment.client.phone}@example.com`;
+
         await this.notificationService.sendAppointmentReminder({
           clientName: appointment.client.name,
           clientEmail: clientEmail,
@@ -610,22 +675,29 @@ export class AppointmentsService {
           companyEmail: appointment.company.email || '',
           companyPhone: appointment.company.phone || '',
           companyAddress: appointment.company.address || '',
-          appointmentDate: appointment.appointmentDateStart.toLocaleDateString('pt-BR'),
-          appointmentTime: appointment.appointmentDateStart.toLocaleTimeString('pt-BR', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
-          }),
+          appointmentDate:
+            appointment.appointmentDateStart.toLocaleDateString('pt-BR'),
+          appointmentTime: appointment.appointmentDateStart.toLocaleTimeString(
+            'pt-BR',
+            {
+              hour: '2-digit',
+              minute: '2-digit',
+            },
+          ),
           serviceName: appointment.service.name,
           servicePrice: 'A definir',
-          serviceDuration: '1 hora', // Placeholder
+          serviceDuration: '1 hora',
           employeeName: appointment.employee?.name || 'Não especificado',
           confirmUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/confirm-appointment/${appointment.id}`,
           rescheduleUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reschedule-appointment/${appointment.id}`,
         });
-        
+
         sent++;
       } catch (error) {
-        console.error(`Erro ao enviar lembrete para agendamento ${appointment.id}:`, error);
+        console.error(
+          `Erro ao enviar lembrete para agendamento ${appointment.id}:`,
+          error,
+        );
         errors++;
       }
     }

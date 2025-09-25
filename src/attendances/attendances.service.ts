@@ -1,18 +1,31 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
-import { UpdateAttendanceDto, AddAttendanceServiceDto } from './dto/update-attendance.dto';
-import { AttendanceResponseDto, AttendanceServiceResponseDto } from './dto/attendance-response.dto';
+import {
+  UpdateAttendanceDto,
+  AddAttendanceServiceDto,
+} from './dto/update-attendance.dto';
+import {
+  AttendanceResponseDto,
+  AttendanceServiceResponseDto,
+} from './dto/attendance-response.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
 
 @Injectable()
 export class AttendancesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createAttendanceDto: CreateAttendanceDto, companyId: string): Promise<AttendanceResponseDto> {
+  async create(
+    createAttendanceDto: CreateAttendanceDto,
+    companyId: string,
+  ): Promise<AttendanceResponseDto> {
     const { appointmentId, serviceIds, serviceEmployees } = createAttendanceDto;
 
-    // Verificar se o agendamento existe e pertence à empresa
     const appointment = await this.prisma.appointment.findFirst({
       where: {
         id: appointmentId,
@@ -24,19 +37,21 @@ export class AttendancesService {
     });
 
     if (!appointment) {
-      throw new NotFoundException('Agendamento não encontrado ou não pertence à sua empresa');
+      throw new NotFoundException(
+        'Agendamento não encontrado ou não pertence à sua empresa',
+      );
     }
 
-    // Verificar se já existe atendimento para este agendamento
     const existingAttendance = await this.prisma.attendance.findUnique({
       where: { appointmentId },
     });
 
     if (existingAttendance) {
-      throw new BadRequestException('Já existe um atendimento para este agendamento');
+      throw new BadRequestException(
+        'Já existe um atendimento para este agendamento',
+      );
     }
 
-    // Verificar se os serviços pertencem à empresa
     const services = await this.prisma.service.findMany({
       where: {
         id: { in: serviceIds },
@@ -45,12 +60,13 @@ export class AttendancesService {
     });
 
     if (services.length !== serviceIds.length) {
-      throw new BadRequestException('Um ou mais serviços não pertencem à sua empresa');
+      throw new BadRequestException(
+        'Um ou mais serviços não pertencem à sua empresa',
+      );
     }
 
-    // Verificar funcionários se especificados
     if (serviceEmployees && serviceEmployees.length > 0) {
-      const employeeIds = serviceEmployees.map(se => se.employeeId);
+      const employeeIds = serviceEmployees.map((se) => se.employeeId);
       const employees = await this.prisma.employee.findMany({
         where: {
           id: { in: employeeIds },
@@ -59,11 +75,12 @@ export class AttendancesService {
       });
 
       if (employees.length !== employeeIds.length) {
-        throw new BadRequestException('Um ou mais funcionários não pertencem à sua empresa');
+        throw new BadRequestException(
+          'Um ou mais funcionários não pertencem à sua empresa',
+        );
       }
     }
 
-    // Criar o atendimento
     const attendance = await this.prisma.attendance.create({
       data: {
         appointmentId,
@@ -72,16 +89,18 @@ export class AttendancesService {
         attendanceDate: appointment.appointmentDateStart,
         attendanceTime: appointment.appointmentDateStart,
         services: {
-          create: serviceIds.map(serviceId => ({
+          create: serviceIds.map((serviceId) => ({
             serviceId,
           })),
         },
-        employees: serviceEmployees ? {
-          create: serviceEmployees.map(se => ({
-            employeeId: se.employeeId,
-            serviceId: se.serviceId,
-          })),
-        } : undefined,
+        employees: serviceEmployees
+          ? {
+              create: serviceEmployees.map((se) => ({
+                employeeId: se.employeeId,
+                serviceId: se.serviceId,
+              })),
+            }
+          : undefined,
       },
       include: {
         appointment: true,
@@ -112,9 +131,7 @@ export class AttendancesService {
         where: { companyId },
         skip,
         take: limit,
-        orderBy: [
-          { attendanceDate: 'desc' },
-        ],
+        orderBy: [{ attendanceDate: 'desc' }],
         include: {
           appointment: true,
           client: true,
@@ -134,7 +151,9 @@ export class AttendancesService {
       this.prisma.attendance.count({ where: { companyId } }),
     ]);
 
-    const attendances = data.map(attendance => this.formatAttendanceResponse(attendance));
+    const attendances = data.map((attendance) =>
+      this.formatAttendanceResponse(attendance),
+    );
 
     return {
       data: attendances,
@@ -178,18 +197,22 @@ export class AttendancesService {
     return this.formatAttendanceResponse(attendance);
   }
 
-  async update(id: string, updateAttendanceDto: UpdateAttendanceDto, companyId: string): Promise<AttendanceResponseDto> {
+  async update(
+    id: string,
+    updateAttendanceDto: UpdateAttendanceDto,
+    companyId: string,
+  ): Promise<AttendanceResponseDto> {
     const { serviceIds, serviceEmployees } = updateAttendanceDto;
 
     const attendance = await this.findOne(id, companyId);
 
     if (attendance.completedAt) {
-      throw new BadRequestException('Não é possível atualizar um atendimento já finalizado');
+      throw new BadRequestException(
+        'Não é possível atualizar um atendimento já finalizado',
+      );
     }
 
-    // Se serviceIds foi fornecido, atualizar serviços
     if (serviceIds && serviceIds.length > 0) {
-      // Verificar se os serviços pertencem à empresa
       const services = await this.prisma.service.findMany({
         where: {
           id: { in: serviceIds },
@@ -198,25 +221,25 @@ export class AttendancesService {
       });
 
       if (services.length !== serviceIds.length) {
-        throw new BadRequestException('Um ou mais serviços não pertencem à sua empresa');
+        throw new BadRequestException(
+          'Um ou mais serviços não pertencem à sua empresa',
+        );
       }
 
-      // Remover serviços antigos e adicionar novos
       await this.prisma.attendanceService.deleteMany({
         where: { attendanceId: id },
       });
 
       await this.prisma.attendanceService.createMany({
-        data: serviceIds.map(serviceId => ({
+        data: serviceIds.map((serviceId) => ({
           attendanceId: id,
           serviceId,
         })),
       });
     }
 
-    // Se serviceEmployees foi fornecido, atualizar funcionários
     if (serviceEmployees && serviceEmployees.length > 0) {
-      const employeeIds = serviceEmployees.map(se => se.employeeId);
+      const employeeIds = serviceEmployees.map((se) => se.employeeId);
       const employees = await this.prisma.employee.findMany({
         where: {
           id: { in: employeeIds },
@@ -225,16 +248,17 @@ export class AttendancesService {
       });
 
       if (employees.length !== employeeIds.length) {
-        throw new BadRequestException('Um ou mais funcionários não pertencem à sua empresa');
+        throw new BadRequestException(
+          'Um ou mais funcionários não pertencem à sua empresa',
+        );
       }
 
-      // Remover funcionários antigos e adicionar novos
       await this.prisma.attendanceEmployee.deleteMany({
         where: { attendanceId: id },
       });
 
       await this.prisma.attendanceEmployee.createMany({
-        data: serviceEmployees.map(se => ({
+        data: serviceEmployees.map((se) => ({
           attendanceId: id,
           employeeId: se.employeeId,
           serviceId: se.serviceId,
@@ -242,11 +266,13 @@ export class AttendancesService {
       });
     }
 
-    // Buscar o atendimento atualizado
     return this.findOne(id, companyId);
   }
 
-  async complete(id: string, companyId: string): Promise<AttendanceResponseDto> {
+  async complete(
+    id: string,
+    companyId: string,
+  ): Promise<AttendanceResponseDto> {
     const attendance = await this.findOne(id, companyId);
 
     if (attendance.completedAt) {
@@ -275,7 +301,6 @@ export class AttendancesService {
       },
     });
 
-    // Atualizar status do agendamento para 'completed'
     await this.prisma.appointment.update({
       where: { id: attendance.appointment.id },
       data: { status: 'completed' },
@@ -284,7 +309,10 @@ export class AttendancesService {
     return this.formatAttendanceResponse(updatedAttendance);
   }
 
-  async getAttendanceServices(id: string, companyId: string): Promise<AttendanceServiceResponseDto[]> {
+  async getAttendanceServices(
+    id: string,
+    companyId: string,
+  ): Promise<AttendanceServiceResponseDto[]> {
     const attendance = await this.findOne(id, companyId);
 
     const attendanceServices = await this.prisma.attendanceService.findMany({
@@ -301,9 +329,11 @@ export class AttendancesService {
       },
     });
 
-    return attendanceServices.map(as => {
-      const employee = attendanceEmployees.find(ae => ae.serviceId === as.serviceId);
-      
+    return attendanceServices.map((as) => {
+      const employee = attendanceEmployees.find(
+        (ae) => ae.serviceId === as.serviceId,
+      );
+
       return {
         id: as.id,
         service: {
@@ -312,25 +342,32 @@ export class AttendancesService {
           description: as.service.description,
           isFavorite: as.service.isFavorite,
         },
-        employee: employee ? {
-          id: employee.employee.id,
-          name: employee.employee.name,
-          photoUrl: employee.employee.photoUrl || undefined,
-        } : undefined,
+        employee: employee
+          ? {
+              id: employee.employee.id,
+              name: employee.employee.name,
+              photoUrl: employee.employee.photoUrl || undefined,
+            }
+          : undefined,
       };
     });
   }
 
-  async addService(id: string, addServiceDto: AddAttendanceServiceDto, companyId: string): Promise<AttendanceServiceResponseDto> {
+  async addService(
+    id: string,
+    addServiceDto: AddAttendanceServiceDto,
+    companyId: string,
+  ): Promise<AttendanceServiceResponseDto> {
     const { serviceId, employeeId } = addServiceDto;
-    
+
     const attendance = await this.findOne(id, companyId);
 
     if (attendance.completedAt) {
-      throw new BadRequestException('Não é possível adicionar serviços a um atendimento já finalizado');
+      throw new BadRequestException(
+        'Não é possível adicionar serviços a um atendimento já finalizado',
+      );
     }
 
-    // Verificar se o serviço pertence à empresa
     const service = await this.prisma.service.findFirst({
       where: {
         id: serviceId,
@@ -339,10 +376,11 @@ export class AttendancesService {
     });
 
     if (!service) {
-      throw new NotFoundException('Serviço não encontrado ou não pertence à sua empresa');
+      throw new NotFoundException(
+        'Serviço não encontrado ou não pertence à sua empresa',
+      );
     }
 
-    // Verificar se o funcionário pertence à empresa (se especificado)
     if (employeeId) {
       const employee = await this.prisma.employee.findFirst({
         where: {
@@ -352,11 +390,12 @@ export class AttendancesService {
       });
 
       if (!employee) {
-        throw new NotFoundException('Funcionário não encontrado ou não pertence à sua empresa');
+        throw new NotFoundException(
+          'Funcionário não encontrado ou não pertence à sua empresa',
+        );
       }
     }
 
-    // Verificar se o serviço já está no atendimento
     const existingService = await this.prisma.attendanceService.findFirst({
       where: {
         attendanceId: id,
@@ -365,10 +404,11 @@ export class AttendancesService {
     });
 
     if (existingService) {
-      throw new BadRequestException('Serviço já está incluído neste atendimento');
+      throw new BadRequestException(
+        'Serviço já está incluído neste atendimento',
+      );
     }
 
-    // Adicionar o serviço
     const attendanceService = await this.prisma.attendanceService.create({
       data: {
         attendanceId: id,
@@ -379,7 +419,6 @@ export class AttendancesService {
       },
     });
 
-    // Adicionar funcionário se especificado
     if (employeeId) {
       await this.prisma.attendanceEmployee.create({
         data: {
@@ -390,10 +429,11 @@ export class AttendancesService {
       });
     }
 
-    // Buscar dados do funcionário se adicionado
-    const employee = employeeId ? await this.prisma.employee.findUnique({
-      where: { id: employeeId },
-    }) : null;
+    const employee = employeeId
+      ? await this.prisma.employee.findUnique({
+          where: { id: employeeId },
+        })
+      : null;
 
     return {
       id: attendanceService.id,
@@ -403,31 +443,39 @@ export class AttendancesService {
         description: attendanceService.service.description,
         isFavorite: attendanceService.service.isFavorite,
       },
-      employee: employee ? {
-        id: employee.id,
-        name: employee.name,
-        photoUrl: employee.photoUrl || undefined,
-      } : undefined,
+      employee: employee
+        ? {
+            id: employee.id,
+            name: employee.name,
+            photoUrl: employee.photoUrl || undefined,
+          }
+        : undefined,
     };
   }
 
-  async removeService(id: string, serviceId: string, companyId: string): Promise<{ message: string }> {
+  async removeService(
+    id: string,
+    serviceId: string,
+    companyId: string,
+  ): Promise<{ message: string }> {
     const attendance = await this.findOne(id, companyId);
 
     if (attendance.completedAt) {
-      throw new BadRequestException('Não é possível remover serviços de um atendimento já finalizado');
+      throw new BadRequestException(
+        'Não é possível remover serviços de um atendimento já finalizado',
+      );
     }
 
-    // Verificar se há pelo menos 2 serviços (deve manter ao menos 1)
     const serviceCount = await this.prisma.attendanceService.count({
       where: { attendanceId: id },
     });
 
     if (serviceCount <= 1) {
-      throw new BadRequestException('Não é possível remover o último serviço do atendimento');
+      throw new BadRequestException(
+        'Não é possível remover o último serviço do atendimento',
+      );
     }
 
-    // Remover o serviço
     const deleted = await this.prisma.attendanceService.deleteMany({
       where: {
         attendanceId: id,
@@ -439,7 +487,6 @@ export class AttendancesService {
       throw new NotFoundException('Serviço não encontrado neste atendimento');
     }
 
-    // Remover funcionário relacionado se existir
     await this.prisma.attendanceEmployee.deleteMany({
       where: {
         attendanceId: id,
@@ -451,10 +498,9 @@ export class AttendancesService {
   }
 
   private formatAttendanceResponse(attendance: any): AttendanceResponseDto {
-    // Mapear funcionários por serviço
     const employeesByService = new Map();
     if (attendance.employees) {
-      attendance.employees.forEach(ae => {
+      attendance.employees.forEach((ae) => {
         employeesByService.set(ae.serviceId, {
           id: ae.employee.id,
           name: ae.employee.name,
@@ -480,7 +526,7 @@ export class AttendancesService {
       attendanceDate: attendance.attendanceDate,
       attendanceTime: attendance.attendanceTime,
       completedAt: attendance.completedAt,
-      services: attendance.services.map(as => ({
+      services: attendance.services.map((as) => ({
         id: as.id,
         service: {
           id: as.service.id,

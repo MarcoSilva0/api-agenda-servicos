@@ -351,7 +351,6 @@ export class AppointmentsController {
     return this.appointmentsService.remove(id, req.user.companyId);
   }
 
-  // Endpoints para Calendário (RF07)
   @Get('calendar')
   @ApiOperation({
     summary: 'Visualizar calendário de agendamentos',
@@ -419,7 +418,6 @@ export class AppointmentsController {
     @Param('date') date: string,
     @Request() req: any,
   ): Promise<AppointmentResponseDto[]> {
-    // Validação básica do formato de data
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(date)) {
       throw new BadRequestException('Formato de data inválido. Use YYYY-MM-DD');

@@ -41,7 +41,7 @@ export class UploadsController {
     const mimeType = mime.lookup(physicalPath) || 'application/octet-stream';
 
     res.setHeader('Content-Type', mimeType);
-    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache por 1 ano
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
     
     res.sendFile(physicalPath);
   }

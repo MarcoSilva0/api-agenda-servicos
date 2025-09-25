@@ -47,7 +47,7 @@ export class EmployeesService {
       preferredServices: employee.servicePreferences.map(
         (pref) => pref.service,
       ),
-      servicePreferences: undefined, // Remove servicePreferences da resposta
+      servicePreferences: undefined,
     }));
 
     return {
@@ -93,7 +93,7 @@ export class EmployeesService {
       preferredServices: employee.servicePreferences.map(
         (pref) => pref.service,
       ),
-      servicePreferences: undefined, // Remove servicePreferences da resposta
+      servicePreferences: undefined,
     } as EmployeeResponseDto;
   }
 
@@ -127,7 +127,7 @@ export class EmployeesService {
       preferredServices: employee.servicePreferences.map(
         (pref) => pref.service,
       ),
-      servicePreferences: undefined, // Remove servicePreferences da resposta
+      servicePreferences: undefined,
     } as EmployeeResponseDto;
   }
 
@@ -162,14 +162,13 @@ export class EmployeesService {
       preferredServices: updatedEmployee.servicePreferences.map(
         (pref) => pref.service,
       ),
-      servicePreferences: undefined, // Remove servicePreferences da resposta
+      servicePreferences: undefined,
     } as EmployeeResponseDto;
   }
 
   async remove(id: string, companyId: string) {
     const employee = await this.findOne(id, companyId);
 
-    // Remove preferências primeiro devido às constraints
     await this.prisma.employeeServicePreference.deleteMany({
       where: { employeeId: id },
     });
@@ -211,7 +210,6 @@ export class EmployeesService {
   ) {
     const employee = await this.findOne(employeeId, companyId);
 
-    // Verificar se todos os serviços pertencem à empresa
     const services = await this.prisma.service.findMany({
       where: {
         id: { in: servicePreferenceDto.serviceIds },
@@ -223,12 +221,10 @@ export class EmployeesService {
       throw new NotFoundException('Um ou mais serviços não foram encontrados');
     }
 
-    // Remove preferências antigas
     await this.prisma.employeeServicePreference.deleteMany({
       where: { employeeId },
     });
 
-    // Adiciona novas preferências
     if (servicePreferenceDto.serviceIds.length > 0) {
       await this.prisma.employeeServicePreference.createMany({
         data: servicePreferenceDto.serviceIds.map((serviceId) => ({

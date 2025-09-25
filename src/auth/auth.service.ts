@@ -1,13 +1,18 @@
-import { Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
-import { 
-  RegisterDto, 
-  LoginDto, 
-  ForgotPasswordDto, 
-  ResetPasswordDto, 
-  AuthResponseDto 
+import {
+  RegisterDto,
+  LoginDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+  AuthResponseDto,
 } from './dto/auth.dto';
 import { ThemePreference } from '@prisma/client';
 import { MailerService } from 'src/mailer/mailer.service';
@@ -24,8 +29,10 @@ export class AuthService {
     private readonly fileUploadService: FileUploadService,
   ) {}
 
-  async register(registerDto: RegisterDto, logoFile?: any): Promise<AuthResponseDto> {
-    // Verificar se o email já existe
+  async register(
+    registerDto: RegisterDto,
+    logoFile?: any,
+  ): Promise<AuthResponseDto> {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: registerDto.email },
     });
@@ -34,43 +41,36 @@ export class AuthService {
       throw new BadRequestException('Email já cadastrado');
     }
 
-    // Hash da senha
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
-    // Criar empresa e usuário em uma transação
     const result = await this.prisma.$transaction(async (tx) => {
-      // Criar empresa primeiro
       const company = await tx.company.create({
         data: {
           name: registerDto.companyName,
           email: registerDto.email,
           phone: registerDto.phone,
           address: registerDto.address,
-          logoUrl: null, // Será atualizado após salvar a logo
+          logoUrl: null,
           activityBranchId: registerDto.activityBranchId.toString(),
         },
       });
 
-      // Salvar logo se fornecida (arquivo ou base64)
       let logoUrl: string | null = null;
-      
+
       try {
         if (logoFile && logoFile.buffer) {
-          // Logo enviada como arquivo (multipart/form-data)
           logoUrl = await this.fileUploadService.saveCompanyLogoFromBuffer(
             company.id,
             logoFile.buffer,
-            logoFile.mimetype
+            logoFile.mimetype,
           );
         } else if (registerDto.logo && registerDto.logo.startsWith('data:')) {
-          // Logo enviada como base64 (JSON)
           logoUrl = await this.fileUploadService.saveCompanyLogo(
             company.id,
-            registerDto.logo
+            registerDto.logo,
           );
         }
-        
-        // Atualizar empresa com a URL da logo se foi salva
+
         if (logoUrl) {
           await tx.company.update({
             where: { id: company.id },
@@ -79,10 +79,8 @@ export class AuthService {
         }
       } catch (error) {
         console.warn('Erro ao salvar logo da empresa:', error.message);
-        // Continuar o registro mesmo se a logo falhar
       }
 
-      // Criar usuário
       const user = await tx.user.create({
         data: {
           companyId: company.id,
@@ -101,26 +99,27 @@ export class AuthService {
       return { user, company: { ...company, logoUrl } };
     });
 
-    // Gerar JWT
-    const payload = { 
-      sub: result.user.id, 
+    const payload = {
+      sub: result.user.id,
       email: result.user.email,
       name: result.user.name,
       companyId: result.user.companyId,
-      role: result.user.role
+      role: result.user.role,
     };
     const access_token = this.jwtService.sign(payload);
 
-    // Enviar email de boas-vindas
     try {
-      const welcomeEmailContent = this.emailTemplateService.renderTemplate('welcome', {
-        userName: result.user.name,
-        companyName: result.company.name,
-        companyEmail: result.company.email,
-        companyPhone: result.company.phone,
-        companyAddress: result.company.address,
-        loginUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
-      });
+      const welcomeEmailContent = this.emailTemplateService.renderTemplate(
+        'welcome',
+        {
+          userName: result.user.name,
+          companyName: result.company.name,
+          companyEmail: result.company.email,
+          companyPhone: result.company.phone,
+          companyAddress: result.company.address,
+          loginUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
+        },
+      );
 
       await this.mailerService.sendEmail(
         result.user.email,
@@ -129,9 +128,8 @@ export class AuthService {
       );
     } catch (error) {
       console.error('Erro ao enviar email de boas-vindas:', error);
-      // Não bloquear o registro se o email falhar
     }
-    
+
     return {
       access_token,
       user: {
@@ -151,7 +149,6 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
-    // Buscar usuário
     const user = await this.prisma.user.findUnique({
       where: { email: loginDto.email },
       include: {
@@ -163,19 +160,20 @@ export class AuthService {
       throw new UnauthorizedException('Credenciais inválidas');
     }
 
-    // Verificar senha
-    const isPasswordValid = await bcrypt.compare(loginDto.password, user.passwordHash);
+    const isPasswordValid = await bcrypt.compare(
+      loginDto.password,
+      user.passwordHash,
+    );
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciais inválidas');
     }
 
-    // Gerar JWT
-    const payload = { 
-      sub: user.id, 
+    const payload = {
+      sub: user.id,
       email: user.email,
       name: user.name,
       companyId: user.companyId,
-      role: user.role
+      role: user.role,
     };
     const access_token = this.jwtService.sign(payload);
 
@@ -206,33 +204,32 @@ export class AuthService {
       throw new NotFoundException('Email não encontrado');
     }
 
-    // Gerar token de recuperação
-    const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    
-    // Salvar token no banco (criar tabela se necessário)
+    const resetToken =
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15);
+
     await this.prisma.passwordRecoveryToken.create({
       data: {
         userId: user.id,
         token: resetToken,
-        expiresAt: new Date(Date.now() + 3600000), // 1 hora
+        expiresAt: new Date(Date.now() + 3600000),
       },
     });
 
-    // Buscar dados da empresa para o email
     const userWithCompany = await this.prisma.user.findUnique({
       where: { id: user.id },
       include: { company: true },
     });
 
-    // Enviar email de redefinição de senha
     try {
       const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
-      
-      const passwordResetEmailContent = this.emailTemplateService.renderTemplate('password-reset', {
-        userName: user.name,
-        companyName: userWithCompany?.company?.name || 'Sistema',
-        resetUrl: resetUrl,
-      });
+
+      const passwordResetEmailContent =
+        this.emailTemplateService.renderTemplate('password-reset', {
+          userName: user.name,
+          companyName: userWithCompany?.company?.name || 'Sistema',
+          resetUrl: resetUrl,
+        });
 
       await this.mailerService.sendEmail(
         user.email,
@@ -241,18 +238,16 @@ export class AuthService {
       );
     } catch (error) {
       console.error('Erro ao enviar email de redefinição de senha:', error);
-      // Não bloquear o processo se o email falhar
     }
 
     return {
       message: 'Email de recuperação enviado',
-      // Em desenvolvimento, manter o token para facilitar testes:
+
       ...(process.env.NODE_ENV === 'development' && { token: resetToken }),
     };
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {
-    // Buscar token
     const tokenRecord = await this.prisma.passwordRecoveryToken.findFirst({
       where: {
         token: resetPasswordDto.token,
@@ -270,10 +265,8 @@ export class AuthService {
       throw new BadRequestException('Token inválido ou expirado');
     }
 
-    // Hash da nova senha
     const hashedPassword = await bcrypt.hash(resetPasswordDto.newPassword, 10);
 
-    // Atualizar senha e marcar token como usado
     await this.prisma.$transaction([
       this.prisma.user.update({
         where: { id: tokenRecord.userId },

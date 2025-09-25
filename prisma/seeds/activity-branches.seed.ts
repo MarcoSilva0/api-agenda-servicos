@@ -166,24 +166,20 @@ const activityBranchesData = [
 ];
 
 async function seed() {
-  console.log('🌱 Iniciando seed dos ramos de atividade...');
+  console.log('Iniciando seed dos ramos de atividade...');
 
   try {
-    // Limpar dados existentes (opcional - descomente se quiser resetar)
-    // await prisma.defaultActivityService.deleteMany();
-    // await prisma.activityBranch.deleteMany();
 
     for (const branchData of activityBranchesData) {
-      console.log(`📂 Criando ramo: ${branchData.name}`);
+      console.log(`Criando ramo: ${branchData.name}`);
 
-      // Verificar se o ramo já existe
       const existingBranch = await prisma.activityBranch.findFirst({
         where: { name: branchData.name }
       });
 
       let branch;
       if (existingBranch) {
-        console.log(`   ↳ Ramo já existe, atualizando...`);
+        console.log(`Ramo já existe, atualizando...`);
         branch = await prisma.activityBranch.update({
           where: { id: existingBranch.id },
           data: {
@@ -200,7 +196,6 @@ async function seed() {
         });
       }
 
-      // Criar serviços padrão
       for (const serviceData of branchData.services) {
         const existingService = await prisma.defaultActivityService.findFirst({
           where: {
@@ -220,31 +215,29 @@ async function seed() {
         }
       }
 
-      console.log(`   ✅ ${branchData.services.length} serviços adicionados`);
+      console.log(`${branchData.services.length} serviços adicionados`);
     }
 
-    console.log('🎉 Seed concluído com sucesso!');
-    console.log(`📊 Total de ramos criados: ${activityBranchesData.length}`);
-    
-    // Estatísticas finais
+    console.log('Seed concluído com sucesso!');
+    console.log(`Total de ramos criados: ${activityBranchesData.length}`);
+
     const totalBranches = await prisma.activityBranch.count();
     const totalServices = await prisma.defaultActivityService.count();
-    
-    console.log(`📈 Estatísticas finais:`);
+
+    console.log(`Estatísticas finais:`);
     console.log(`   • Ramos de atividade: ${totalBranches}`);
     console.log(`   • Serviços padrão: ${totalServices}`);
 
   } catch (error) {
-    console.error('❌ Erro durante o seed:', error);
+    console.error('Erro durante o seed:', error);
     throw error;
   }
 }
 
-// Executar o seed se for chamado diretamente
 if (require.main === module) {
   seed()
     .catch((e) => {
-      console.error('💥 Falha no seed:', e);
+      console.error('Falha no seed:', e);
       process.exit(1);
     })
     .finally(async () => {

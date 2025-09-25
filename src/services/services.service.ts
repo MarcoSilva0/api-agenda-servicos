@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateServiceDto, UpdateServiceDto } from './dto/service.dto';
 import { PaginationDto } from '../common/dto/pagination.dto';
@@ -7,7 +11,11 @@ import { PaginationDto } from '../common/dto/pagination.dto';
 export class ServicesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(companyId: string, paginationDto: PaginationDto, favorites?: boolean) {
+  async findAll(
+    companyId: string,
+    paginationDto: PaginationDto,
+    favorites?: boolean,
+  ) {
     const { page = 1, limit = 10 } = paginationDto;
     const skip = (page - 1) * limit;
 
@@ -21,10 +29,7 @@ export class ServicesService {
         where,
         skip,
         take: limit,
-        orderBy: [
-          { isFavorite: 'desc' },
-          { name: 'asc' },
-        ],
+        orderBy: [{ isFavorite: 'desc' }, { name: 'asc' }],
       }),
       this.prisma.service.count({ where }),
     ]);
@@ -77,16 +82,16 @@ export class ServicesService {
   }
 
   async importServices(companyId: string, activityBranchId: string) {
-    // Buscar serviços padrão do ramo de atividade
     const defaultServices = await this.prisma.defaultActivityService.findMany({
       where: { activityBranchId },
     });
 
     if (defaultServices.length === 0) {
-      return { message: 'Nenhum serviço encontrado para este ramo de atividade' };
+      return {
+        message: 'Nenhum serviço encontrado para este ramo de atividade',
+      };
     }
 
-    // Verificar quais serviços já existem para evitar duplicatas
     const existingServices = await this.prisma.service.findMany({
       where: {
         companyId,
@@ -95,20 +100,21 @@ export class ServicesService {
       },
     });
 
-    const existingServiceNames = existingServices.map(s => s.name.toLowerCase());
+    const existingServiceNames = existingServices.map((s) =>
+      s.name.toLowerCase(),
+    );
 
-    // Filtrar serviços que não existem ainda
     const servicesToImport = defaultServices.filter(
-      defaultService => !existingServiceNames.includes(defaultService.name.toLowerCase())
+      (defaultService) =>
+        !existingServiceNames.includes(defaultService.name.toLowerCase()),
     );
 
     if (servicesToImport.length === 0) {
       return { message: 'Todos os serviços deste ramo já foram importados' };
     }
 
-    // Importar serviços em lote
     const importedServices = await this.prisma.service.createMany({
-      data: servicesToImport.map(defaultService => ({
+      data: servicesToImport.map((defaultService) => ({
         companyId,
         name: defaultService.name,
         description: defaultService.description,
@@ -124,7 +130,11 @@ export class ServicesService {
     };
   }
 
-  async update(id: string, companyId: string, updateServiceDto: UpdateServiceDto) {
+  async update(
+    id: string,
+    companyId: string,
+    updateServiceDto: UpdateServiceDto,
+  ) {
     const service = await this.findOne(id, companyId);
 
     return this.prisma.service.update({

@@ -60,7 +60,6 @@ export class UsersService {
   }
 
   async getTheme(userId: string, requestingUserId: string): Promise<ThemeResponseDto> {
-    // Verificar se o usuário está tentando acessar seu próprio tema ou é admin
     if (userId !== requestingUserId) {
       const requestingUser = await this.prisma.user.findUnique({
         where: { id: requestingUserId },
@@ -90,7 +89,6 @@ export class UsersService {
   }
 
   async updateTheme(userId: string, updateThemeDto: UpdateThemeDto, requestingUserId: string): Promise<ThemeResponseDto> {
-    // Verificar se o usuário está tentando atualizar seu próprio tema ou é admin
     if (userId !== requestingUserId) {
       const requestingUser = await this.prisma.user.findUnique({
         where: { id: requestingUserId },

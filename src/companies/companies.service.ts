@@ -61,7 +61,6 @@ Agradecemos a confiança!`;
   }
 
   async generateAttendanceShareText(attendanceId: string, companyId: string): Promise<AttendanceShareResponseDto> {
-    // Buscar dados do atendimento
     const attendance = await this.prisma.attendance.findUnique({
       where: { id: attendanceId },
       include: {
@@ -88,11 +87,9 @@ Agradecemos a confiança!`;
       throw new ForbiddenException('Apenas atendimentos finalizados podem ser compartilhados');
     }
 
-    // Obter template da empresa
     const templateData = await this.getShareTemplate(companyId);
     const template = templateData.customShareTemplate;
 
-    // Formatar dados para substituição
     const serviceNames = attendance.services.map(as => as.service.name).join(', ');
     const attendanceDate = new Intl.DateTimeFormat('pt-BR', {
       day: '2-digit',
@@ -100,7 +97,6 @@ Agradecemos a confiança!`;
       year: 'numeric',
     }).format(attendance.attendanceDate);
 
-    // Substituir variáveis no template
     const shareText = template
       .replace(/{companyName}/g, attendance.company.name)
       .replace(/{attendanceDate}/g, attendanceDate)

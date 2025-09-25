@@ -8,7 +8,6 @@ import { join } from 'path';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   
-  // Servir arquivos estáticos da pasta public
   app.useStaticAssets(join(__dirname, '..', 'public'));
   
   app.useGlobalPipes(new ValidationPipe());

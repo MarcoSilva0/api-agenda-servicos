@@ -104,10 +104,8 @@ export class ClientsService {
     const limit = parseInt(query.limit || '10');
     const skip = (page - 1) * limit;
 
-    // Construir filtros
     const where: any = { companyId };
 
-    // Filtro por nome
     if (query.name) {
       where.name = {
         contains: query.name,
@@ -115,7 +113,6 @@ export class ClientsService {
       };
     }
 
-    // Filtros de data baseados em attendances
     const dateFilters: any = {};
 
     if (query.startDate) {
@@ -145,7 +142,6 @@ export class ClientsService {
       dateFilters.lte = endDate;
     }
 
-    // Se há filtros de data, buscar apenas clientes que foram atendidos no período
     if (Object.keys(dateFilters).length > 0) {
       where.attendances = {
         some: {
