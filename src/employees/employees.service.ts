@@ -90,10 +90,9 @@ export class EmployeesService {
     return {
       ...employee,
       photoUrl: employee.photoUrl ?? undefined,
-      preferredServices: employee.servicePreferences.map(
+      servicePreferences: employee.servicePreferences.map(
         (pref) => pref.service,
       ),
-      servicePreferences: undefined,
     } as EmployeeResponseDto;
   }
 
