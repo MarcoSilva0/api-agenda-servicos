@@ -86,6 +86,7 @@ export class ActivityBranchesController {
     return this.activityBranchesService.getDefaultServices(id);
   }
 
+  @Public()
   @Post()
   @ApiOperation({
     summary: 'Criar novo ramo de atividade',
