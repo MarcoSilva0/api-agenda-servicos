@@ -19,6 +19,7 @@ import {
 } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Public } from 'src/auth/decorators/public.decorator';
 import { ActivityBranchesService } from './activity-branches.service';
 import {
   CreateActivityBranchDto,
@@ -36,10 +37,11 @@ export class ActivityBranchesController {
     private readonly activityBranchesService: ActivityBranchesService,
   ) {}
 
+  @Public()
   @Get()
   @ApiOperation({
     summary: 'Listar ramos de atividade',
-    description: 'Lista todos os ramos de atividade disponíveis (RF03)',
+    description: 'Lista todos os ramos de atividade disponíveis (RF03) - Endpoint público',
   })
   @ApiQuery({ type: PaginationDto })
   @ApiResponse({

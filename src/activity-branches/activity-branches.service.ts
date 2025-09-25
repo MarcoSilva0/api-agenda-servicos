@@ -12,12 +12,14 @@ export class ActivityBranchesService {
 
   async findAll(paginationDto: PaginationDto) {
     const { page = 1, limit = 10 } = paginationDto;
-    const skip = (page - 1) * limit;
+    const pageNum = parseInt(String(page), 10);
+    const limitNum = parseInt(String(limit), 10);
+    const skip = (pageNum - 1) * limitNum;
 
     const [data, total] = await Promise.all([
       this.prisma.activityBranch.findMany({
         skip,
-        take: limit,
+        take: limitNum,
         orderBy: { name: 'asc' },
       }),
       this.prisma.activityBranch.count(),
@@ -26,8 +28,8 @@ export class ActivityBranchesService {
     return {
       data,
       pagination: {
-        page,
-        limit,
+        page: pageNum,
+        limit: limitNum,
         total,
         totalPages: Math.ceil(total / limit),
       },
